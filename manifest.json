@@ -1,0 +1,35 @@
+{
+  "manifest_version": 2,
+  "name": "OTRSPattern",
+  "version": "1.0",
+
+  "description": "Put pattern to ticket OTRS",
+
+  "icons": {
+    "48": "icons/otrs-48.png"
+  },
+
+  "content_scripts": [
+    {
+      "matches": ["*://*.help.ukrposhta.loc/otrs/index.pl*"],
+      "js": ["OTRSPattern.js", "answers.js"]
+    }
+  ],
+  
+  
+  "permissions": [
+    "storage",
+    "*://api.telegram.org/*"
+  ],
+  
+  "page_action": {
+	"show_matches": ["*://*.help.ukrposhta.loc/otrs/index.pl*"],
+	"default_icon": {
+		"19": "icons/otrs-19.png",
+		"38": "icons/otrs-38.png"
+	},
+	"default_title": "OTRS Pattern",
+	"default_popup": "popup/Pattern_form.html"
+  }
+
+}
