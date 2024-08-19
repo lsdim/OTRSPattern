@@ -1,4 +1,7 @@
 ﻿
+const DBUrl = 'https://otrs-patterns-default-rtdb.europe-west1.firebasedatabase.app/patterns.json';
+
+
 const loginForm = document.getElementById('loginForm');
 
 const patternTag = document.getElementById("patternTag");
@@ -6,7 +9,8 @@ const patternName = document.getElementById("patternName");
 const patternText = document.getElementById("patternText");
 
 
-const patterns = [
+
+/*const patterns = [
 				{tag: 'АРМ ВЗ', pattern: [
 					{name: 'Помилка друку принтера з АРМ ВЗ', text: 'Налаштовано формат вихідного паперу'},
 					{name: 'Не можна закрити день', text: 'Є ПВ виданні в доставку, термін зберігання яких закінчився'},
@@ -25,25 +29,63 @@ const patterns = [
 	 
 				];
 				
-for (let i = 0; i<=patterns.length-1; i++){
-    let opt = document.createElement('option');
-    opt.value = patterns[i].tag;
-    opt.innerHTML = patterns[i].tag;
-    patternTag.appendChild(opt);
+*/
+
+//const patterns = 
+setValues();
+
+async function setValues() {
+	
+	const patterns = await getPatternsFromDB(DBUrl);
+
+	//const patterns = Object.values(newPatterns);
+	//console.log('newPatterns', newPatterns);
+	
+	
+	fillPattertTag(patterns)
+
+	getPatternsByTag(patterns);
+	
+	patternTag.addEventListener("change", (event) => {
+		//console.log('patterns', patterns);
+		getPatternsByTag(patterns, event.target.value);
+	});
+
+	patternName.addEventListener("change", (event) => {
+		//console.log('patternName', event.target.value);
+		getPatternsTextByName(patterns, event.target.value, patternTag.value);
+	});
+	
+	//return patterns;
+}	
+
+function fillPattertTag(patterns) {
+		for (const key in patterns){
+		let opt = document.createElement('option');
+		//console.log('patterns['+key+']',patterns[key]);
+		opt.value = key;
+		opt.innerHTML = patterns[key].tag;
+		patternTag.appendChild(opt);
+	}
 }
 
-getPatternsByTag(patterns);
+//*********************************
 
-patternTag.addEventListener("change", (event) => {
-	//console.log('patterns', patterns);
-	getPatternsByTag(patterns, event.target.value);
-});
+//console.log('patterns',patterns);
 
-patternName.addEventListener("change", (event) => {
-	console.log('patternName', event.target.value);
-	getPatternsByName(patterns, event.target.value);
-});
+//*********************************
+/*for (let i = 0; i<=patterns.length-1; i++){
+		let opt = document.createElement('option');
+		console.log('patterns[i]',patterns[i]);
+		opt.value = patterns[i].tag;
+		opt.innerHTML = patterns[i].tag;
+		patternTag.appendChild(opt);
+	}
 
+	getPatternsByTag(patterns);
+*/
+
+/*
 function getPatternsByName(patterns, name) {
 	let pattText;
 	for (let i=0; i<patterns.length; i++) {
@@ -55,11 +97,81 @@ function getPatternsByName(patterns, name) {
 	
 	if (pattText.length >0) {
 		patternText.innerHTML = pattText[0].text;
+	}		
+}
+*/
+
+/*
+function getPatternsByName(patterns, name) {
+	let pattText;
+	for (let i=0; i<patterns.length; i++) {
+		pattText = patterns[i].pattern.filter((patt)=> patt.name === name);
+		if (pattText.length>0) {
+			break;
+		}
 	}
 	
-		
+	if (pattText.length >0) {
+		patternText.innerHTML = pattText[0].text;
+	}		
+}
+*/
+
+function getPatternsTextByName(patterns, id, tag) {
+
+	//console.log('getPatternsByName', patterns);
+	if (!tag) {
+		for (const key in patterns) {
+			if (Object.keys(patterns[key].pattern).includes(id)) {
+				patternText.innerHTML = patterns[key].pattern[id].text;
+				return;
+			}
+		}
+	} else {
+		patternText.innerHTML = patterns[tag].pattern[id].text;
+	}
+	
 }
 
+function getPatternsByTag(patterns, tag) {
+	
+	patternName.innerHTML = null;
+	
+	let newPatterns;
+	//console.log('newPatterns1', newPatterns, patterns);
+	//console.log('tag', tag);
+	
+	if (tag) {
+		newPatterns = {tag: patterns[tag]}; //.filter((patt) =>(patt.tag === tag));
+	} else {
+		newPatterns = patterns;
+	};
+	
+	//console.log('newPatterns2', newPatterns, patterns);
+	let i = 0;
+	let j = 0;
+	for (const key in newPatterns){
+		//console.log('key', key);
+		for (const keyPatt in newPatterns[key].pattern) {
+			//console.log('keyPatt', keyPatt);
+			let opt = document.createElement('option');
+			opt.value = keyPatt;
+			opt.innerHTML = newPatterns[key].pattern[keyPatt].name;
+			patternName.appendChild(opt);
+			
+			if (i===0 && j === 0) {
+				getPatternsTextByName(newPatterns, keyPatt, key);
+			}
+			
+			j++;
+		}	
+		i++;
+	}
+}
+
+
+
+/*
 function getPatternsByTag(patterns, tag) {
 	
 	patternName.innerHTML = null;
@@ -88,6 +200,41 @@ function getPatternsByTag(patterns, tag) {
 			}
 		}		
 	}
+}
+*/
+
+async function getPatternsFromDB(url) {	
+    try {
+        const responseID = await fetch(url);
+        if (!responseID.ok) {
+            throw new Error('Network response was not ok for the first fetch');
+        }
+
+        const json = await responseID.json();
+		//console.log('json', json);
+		return json;
+        /*const article = getArticleID(htmlID);
+		const articleURL = article.url;
+		
+		//console.log('article', article);
+
+        if (!articleURL) {
+            throw new Error('Article URL not found');
+        }
+
+		//console.log(`${url}#${articleURL}`);
+        const response2 = await fetch(`http://help.ukrposhta.loc${articleURL}`);
+        if (!response2.ok) {
+            throw new Error('Network response was not ok for the second fetch');
+        }
+
+        const html2 = await response2.text();		
+        return getArticleText(html2, article.id);
+		
+		*/
+    } catch (error) {
+        console.error('There has been a problem with your fetch operation:', error);
+    }
 }
 
 
