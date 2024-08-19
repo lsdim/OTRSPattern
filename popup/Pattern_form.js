@@ -69,68 +69,22 @@ function fillPattertTag(patterns) {
 	}
 }
 
-//*********************************
-
-//console.log('patterns',patterns);
-
-//*********************************
-/*for (let i = 0; i<=patterns.length-1; i++){
-		let opt = document.createElement('option');
-		console.log('patterns[i]',patterns[i]);
-		opt.value = patterns[i].tag;
-		opt.innerHTML = patterns[i].tag;
-		patternTag.appendChild(opt);
-	}
-
-	getPatternsByTag(patterns);
-*/
-
-/*
-function getPatternsByName(patterns, name) {
-	let pattText;
-	for (let i=0; i<patterns.length; i++) {
-		pattText = patterns[i].pattern.filter((patt)=> patt.name === name);
-		if (pattText.length>0) {
-			break;
-		}
-	}
-	
-	if (pattText.length >0) {
-		patternText.innerHTML = pattText[0].text;
-	}		
-}
-*/
-
-/*
-function getPatternsByName(patterns, name) {
-	let pattText;
-	for (let i=0; i<patterns.length; i++) {
-		pattText = patterns[i].pattern.filter((patt)=> patt.name === name);
-		if (pattText.length>0) {
-			break;
-		}
-	}
-	
-	if (pattText.length >0) {
-		patternText.innerHTML = pattText[0].text;
-	}		
-}
-*/
-
 function getPatternsTextByName(patterns, id, tag) {
 
 	//console.log('getPatternsByName', patterns);
 	if (!tag) {
 		for (const key in patterns) {
 			if (Object.keys(patterns[key].pattern).includes(id)) {
-				patternText.innerHTML = patterns[key].pattern[id].text;
+				patternText.value = patterns[key].pattern[id].text;
+				//patternText.value = patternText.innerHTML;
 				return;
 			}
 		}
 	} else {
-		patternText.innerHTML = patterns[tag].pattern[id].text;
+		patternText.value = patterns[tag].pattern[id].text;
+		//patternText.value = patternText.innerHTML;
 	}
-	
+	console.log(patternText);
 }
 
 function getPatternsByTag(patterns, tag) {
@@ -171,38 +125,6 @@ function getPatternsByTag(patterns, tag) {
 
 
 
-/*
-function getPatternsByTag(patterns, tag) {
-	
-	patternName.innerHTML = null;
-	
-	let newPatterns;
-	//console.log('newPatterns1', newPatterns, patterns);
-	//console.log('tag', tag);
-	
-	if (tag) {
-		newPatterns = patterns.filter((patt) =>(patt.tag === tag));
-	} else {
-		newPatterns = patterns;
-	};
-	
-	//console.log('newPatterns2', newPatterns, patterns);
-	
-	for (let i = 0; i<newPatterns.length; i++){
-		for (let j = 0; j<newPatterns[i].pattern.length; j++) {
-			let opt = document.createElement('option');
-			opt.value = newPatterns[i].pattern[j].name;
-			opt.innerHTML = newPatterns[i].pattern[j].name;
-			patternName.appendChild(opt);
-			
-			if (i==0 && j == 0) {
-				getPatternsByName(newPatterns, newPatterns[i].pattern[j].name)
-			}
-		}		
-	}
-}
-*/
-
 async function getPatternsFromDB(url) {	
     try {
         const responseID = await fetch(url);
@@ -213,25 +135,7 @@ async function getPatternsFromDB(url) {
         const json = await responseID.json();
 		//console.log('json', json);
 		return json;
-        /*const article = getArticleID(htmlID);
-		const articleURL = article.url;
-		
-		//console.log('article', article);
-
-        if (!articleURL) {
-            throw new Error('Article URL not found');
-        }
-
-		//console.log(`${url}#${articleURL}`);
-        const response2 = await fetch(`http://help.ukrposhta.loc${articleURL}`);
-        if (!response2.ok) {
-            throw new Error('Network response was not ok for the second fetch');
-        }
-
-        const html2 = await response2.text();		
-        return getArticleText(html2, article.id);
-		
-		*/
+        
     } catch (error) {
         console.error('There has been a problem with your fetch operation:', error);
     }
