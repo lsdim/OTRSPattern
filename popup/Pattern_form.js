@@ -141,6 +141,49 @@ async function getPatternsFromDB(url) {
     }
 }
 
+const loadButton = document.getElementById('loadToServer');
+
+loadButton.addEventListener("click", (e) => {
+  //e.preventDefault();
+  
+  if (!patternTag.value) {
+	  alert("Виберіть групу!");
+	  return;
+  }
+  
+  
+  
+
+ 
+  
+  console.log('loadButton');
+
+  // handle submit
+});
+
+loginForm.addEventListener("submit", (e) => {
+  e.preventDefault();
+  
+  const responseField = document.getElementsByClassName('Mandatory'); //('cke_editable'); 
+  
+  console.log('responseField', responseField);
+  
+  if (responseField.length=0) {
+	  return;
+  }
+  
+  const text = responseField[0].innerHTML;
+  const textArr = text.split('-------------------------------------------');
+  textArr[0] = textArr[0] + patternText.value + '<br><br>';
+  responseField[0].innerHTML = textArr.join('-------------------------------------------');
+
+ 
+  
+  console.log('submit');
+
+  // handle submit
+});
+
 
 
 /*
