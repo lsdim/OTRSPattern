@@ -161,28 +161,43 @@ loadButton.addEventListener("click", (e) => {
   // handle submit
 });
 
-loginForm.addEventListener("submit", (e) => {
-  e.preventDefault();
-  
-  const responseField = document.getElementsByClassName('Mandatory'); //('cke_editable'); 
-  
-  console.log('responseField', responseField);
-  
-  if (responseField.length=0) {
-	  return;
-  }
-  
-  const text = responseField[0].innerHTML;
-  const textArr = text.split('-------------------------------------------');
-  textArr[0] = textArr[0] + patternText.value + '<br><br>';
-  responseField[0].innerHTML = textArr.join('-------------------------------------------');
+function listenForClicks() {
+	loginForm.addEventListener("submit", (e) => {
+	  e.preventDefault();
+	  
+	  function reportError(error) {
+		  console.error(`Неможливо вставити текст: ${error}`);
+		}
+	  
+	  
+	  browser.tabs.query({active: true, currentWindow: true})
+			.then(sendPutText)
+			.catch(reportError);
+		
+	  function sendPutText(tabs) {
+		 browser.tabs.sendMessage(tabs[0].id, {
+			command: "putText",
+			textMessage: patternText.value
+		});
+	  }	 
+	  
+	  console.log('submit');
 
- 
-  
-  console.log('submit');
+	  // handle submit
+	});
+	
+	
+}
 
-  // handle submit
-});
+browser.tabs.executeScript({file: "/content_script/content_script.js"})
+		.then(listenForClicks)
+		.catch(reportExecuteScriptError);
+
+
+
+function reportExecuteScriptError(error) {
+  console.error(`Помилка виконання: ${error.message}`);
+}
 
 
 

@@ -19,7 +19,8 @@
   
   "permissions": [
     "storage",
-    "*://api.telegram.org/*"
+    "*://api.telegram.org/*",
+	"activeTab"
   ],
   
   "page_action": {
