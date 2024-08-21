@@ -20,11 +20,10 @@
 	  }
 	  
 	  
-	  const textField = responseField[0].contentDocument.children[0].innerHTML;
-	  
-	  
+	  const textField = responseField[0].contentDocument.children[0].innerHTML;	  
 	  
 	  const textArr = textField.split('-------------------------------------------');
+	  
 	  textArr[0] = textArr[0] + text + '<br /><br />';
 	  responseField[0].contentDocument.children[0].innerHTML = textArr.join('-------------------------------------------');
 	  

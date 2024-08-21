@@ -84,7 +84,7 @@ function getPatternsTextByName(patterns, id, tag) {
 		patternText.value = patterns[tag].pattern[id].text;
 		//patternText.value = patternText.innerHTML;
 	}
-	console.log(patternText);
+	
 }
 
 function getPatternsByTag(patterns, tag) {
@@ -161,7 +161,7 @@ loadButton.addEventListener("click", (e) => {
   // handle submit
 });
 
-function listenForClicks() {
+function clickPutText() {
 	loginForm.addEventListener("submit", (e) => {
 	  e.preventDefault();
 	  
@@ -182,6 +182,7 @@ function listenForClicks() {
 	  }	 
 	  
 	  console.log('submit');
+	   window.close();
 
 	  // handle submit
 	});
@@ -190,7 +191,7 @@ function listenForClicks() {
 }
 
 browser.tabs.executeScript({file: "/content_script/content_script.js"})
-		.then(listenForClicks)
+		.then(clickPutText)
 		.catch(reportExecuteScriptError);
 
 
@@ -198,6 +199,10 @@ browser.tabs.executeScript({file: "/content_script/content_script.js"})
 function reportExecuteScriptError(error) {
   console.error(`Помилка виконання: ${error.message}`);
 }
+
+
+
+
 
 
 
