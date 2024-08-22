@@ -151,9 +151,7 @@ loadButton.addEventListener("click", (e) => {
 	  return;
   }
   
-  
-  
-
+  uploadPatterns(patternTag.value, patternText.value);
  
   
   console.log('loadButton');
@@ -198,6 +196,62 @@ browser.tabs.executeScript({file: "/content_script/content_script.js"})
 
 function reportExecuteScriptError(error) {
   console.error(`Помилка виконання: ${error.message}`);
+}
+
+
+function showLog(message) {
+	patternText.value = patternText.value + `\n${message}`;
+}
+
+function uploadPatterns(tag, patternsList) {
+    const url = `https://otrs-patterns-default-rtdb.europe-west1.firebasedatabase.app/patterns/${tag}/pattern.json`;
+	
+	const patternsArray = patternsList.split('@');
+	patternText.value = `Завантаження шаблонів ${patternsArray.length} шт.`
+	
+	for (let i=0; i<patternsArray.length; i++) {
+		if (patternsArray[i].trim() === '') {
+			console.log('Порожній елемент');
+			showLog('Порожній шаблон');
+			continue;
+		};
+		
+		const pattern = patternsArray[i].split('$');
+		
+		if (pattern[0].trim() === '' || pattern[1].trim() === '') {
+			showLog("Порожнє ім'я або текст");
+			console.log("Порожнє ім'я або текст", pattern);
+			continue;
+		} else {
+			const data = {
+				name: pattern[0],
+				text: pattern[1]
+			};
+			
+			runUpload(url, data);
+		}
+		
+	}    
+}
+
+function runUpload(url, data) {
+	
+	fetch(url, {
+        method: 'POST',
+		headers: {
+            'Content-Type': 'application/json'
+        },
+		mode: 'cors',        
+        body: JSON.stringify(data)
+    })
+    .then(response => response.json())
+    .then(data => {
+        console.log('Message sent successfully:', data);
+		showLog(`Завантаженно шаблон ${data.name}`);
+    })
+    .catch(error => {
+        console.error('Error sending message:', error);
+    });
 }
 
 
