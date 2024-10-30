@@ -17,14 +17,15 @@
 	  
 	  if (responseField.length=0) {
 		  return;
-	  }
+	  }	  
 	  
+	  const newText = text.replace(/\r?\n/g, "<br />");	  
 	  
 	  const textField = responseField[0].contentDocument.children[0].innerHTML;	  
 	  
 	  const textArr = textField.split('-------------------------------------------');
 	  
-	  textArr[0] = textArr[0] + text + '<br /><br />';
+	  textArr[0] = textArr[0] + newText + '<br /><br />';
 	  responseField[0].contentDocument.children[0].innerHTML = textArr.join('-------------------------------------------');
 	  
 	  /*
