@@ -1,11 +1,6 @@
 
 console.log('start');
 
-
-
-
-
-
 const user = {};
 
 const dev_chat = '-4228417669';
@@ -17,6 +12,126 @@ const CHAT_ID = dev_chat;
 
 //document.body.style.border = "2px solid red";
 let columns = getColumns();
+
+
+/*
+copy the selected text to clipboard
+*/
+function copySelection() {
+    let selectedText = window.getSelection().toString().trim();
+
+    if (selectedText) {
+        document.execCommand("Copy");
+    }
+}
+
+/*
+Add copySelection() as a listener to mouseup events.
+*/
+//document.addEventListener("mouseup", copySelection);
+
+
+//**********************************************************************************************
+//const intervalID = setInterval(checkNewTicket, 60000, columns);
+modTicket(columns) ;
+
+async function modTicket(columns) {
+    const now = new Date();
+    const minute = now.getMinutes();
+    const hours = now.getHours();
+	
+	if (checkDialog()) {
+		console.log('checkDialog');
+		window.location.reload();
+		return;
+	}
+	
+	if (checkNetError()) {
+		console.log('checkNetError');
+		window.location.reload();
+		return;
+	}
+	
+
+    if (checkLogin()) {
+		
+		try {
+			const gettingItem = await browser.storage.local.get('username');
+			user.username = gettingItem.username ? gettingItem.username : '';
+		} catch (error) {
+			console.error('Error getting username from storage:', error);
+		}
+		
+		try {
+			const gettingItem = await browser.storage.local.get('password');
+			user.password = gettingItem.password ? gettingItem.password : '';
+		} catch (error) {
+			console.error('Error getting password from storage:', error);
+		}
+		
+		//console.log('user', user.username);
+		//console.log('password', user.password);
+		
+		const loginError = getLoginError();
+		console.log('loginError', loginError);
+		
+		if (user.username != '' && user.password != '') {
+			login();
+		}
+		
+        if (hours >= 8 && hours < 21) {						
+            if ([5, 20, 35, 50].includes(minute)) {
+				if (loginError) {
+					sendMessage('<blockquote>' + loginError + '</blockquote>\t\n' + getAnswer(answersLogin));
+				} else {
+					sendMessage(getAnswer(answersLogin));
+				}				
+                
+            }
+        }
+        return;
+    }
+	
+	
+	if (window.location.href != 'http://help.ukrposhta.loc/otrs/index.pl?Action=AgentDashboard' &&
+		window.location.href != 'http://help.ukrposhta.loc/otrs/index.pl?') {
+		console.log('Not Dashboard', window.location.href);
+		return;
+	}
+
+    const rows = document.getElementsByClassName("MasterAction");
+
+    const ticketNumId = columns.findIndex(el => el === 'TicketNumber');
+    const createdId = columns.findIndex(el => el === 'Створено');
+    const ageId = columns.findIndex(el => el === 'Відкрита');
+    const titleId = columns.findIndex(el => el === 'Заголовок');
+    const stateId = columns.findIndex(el => el === 'Стан');
+    const ownerId = columns.findIndex(el => el === 'Власник');
+    const customerNameId = columns.findIndex(el => el === "Ім'я клієнта");
+    const ticketTagId = columns.findIndex(el => el === 'Тег заявки');
+    const queueId = columns.findIndex(el => el === 'Черга');
+
+    if (rows.length > 0) {
+        for (let i = 0; i < rows.length; i++) {
+            const ticketURL = getTicketURL(rows[i], ticketNumId);
+            const ticketText = await getTicketText(ticketURL); // Асинхронний виклик
+				
+			setTitleText(rows[i], ticketNumId, ticketText);
+
+        }
+
+    }
+}
+
+
+///************************************************************************************************
+
+
+
+
+
+
+
 
 
 
@@ -378,8 +493,8 @@ async function getArticleText(text, articleId) {
        // console.log('ArticleBody', articleBody);
 		const textMessage = articleBody[0].innerText.split('********************************************************************************')[0]
 							.split('***'); 
-        const mess = 'Текст заявки: \t\n<blockquote>' + textMessage[0].trim() + '</blockquote>'
-							+ '\n 📧<b>' + textMessage[1].split('\n')[1].trim() + '</b>';
+        const mess = textMessage[0].trim()
+							+ '\n***\n' + textMessage[1].split('\n')[1].trim();
         //console.log('mess', mess);
         return mess;			
     } else if (messageBrowser.length > 0) {		
@@ -398,7 +513,7 @@ async function getArticleText(text, articleId) {
 				const iframeHtml = stringToHTML(iframeText);
 				const textMessage = iframeHtml.innerText.trim(); 
 				//console.log('textMessage',textMessage);
-				const mess = 'Текст заявки: \t\n<blockquote expandable>' + textMessage + '</blockquote>';
+				const mess =  textMessage;
 				return mess;			
 			} catch (error) {
 				console.error('There has been a problem with your fetch operation:', error);
@@ -520,6 +635,13 @@ function getColumns() {
 
 function getInnerText(row, id) {
 	return row.children[id].innerText
+}
+
+function setTitleText(row, id, titleText) {
+	if (row.children[id].children.length>0) {
+		row.children[id].children[0].title = titleText;
+	}
+	
 }
 
 function getTicketURL(row, id) {
