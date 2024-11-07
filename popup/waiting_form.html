@@ -23,19 +23,24 @@
 		  <p class="message">Already registered? <a href="#">Sign In</a></p>
 		</form>
 		-->
-		<form ation="" class="login-form" id="loginForm">
-		  <label for="username" class="message">Ім'я користувача</label>
-		  <input id="username" type="text" placeholder="Ім'я користувача"/>
-		  <label for="password" class="message">Пароль</label>
-		  <input id="password" type="password" placeholder="Пароль"/>
-		  <button type="submit">Зберегти</button>
+		<form ation="" class="login-form" id="waitingForm">
+		  <label for="customer" class="message">Індекс або ПІБ заявника</label>
+		  <input id="customer" type="text" placeholder="Індекс або ПІБ заявника"/>
+		  <button type="submit">Додати</button>	  
 		  <!--
 		  <p class="message">Not registered? <a href="#">Create an account</a></p>
 		  -->
 		</form>
+			
+		<table id="customersTable">
+		  <tbody>
+		  </tbody>		  
+		</table>
+		
+		
 	  </div>
 	</div>
-  <script src="login_form.js"></script>
+  <script src="waiting_form.js"></script>
 </body>
 
 </html>

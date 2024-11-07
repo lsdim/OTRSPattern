@@ -121,6 +121,11 @@
 .container .info span .fa {
   color: #EF3B3A;
 }
+
+table, td {
+  border: 1px solid black;
+}
+
 body {
   background: #eaece5 /*#76b852; *//* fallback for old browsers */
   background: rgb(234, 236, 229);
