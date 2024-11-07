@@ -3,15 +3,16 @@
 <html>
   <head>
     <meta charset="utf-8">
-    <link rel="stylesheet" href="pattern_form.css"/>
+    <!-- <link rel="stylesheet" href="login_form.css"/>
+	-->
+	<link rel="stylesheet" href="pattern_form.css"/>
   </head>
 
 <body>
   <div class="login-page">
-  <a href="./Pattern_form.html">Шаблони</a>
+    <a href="./Pattern_form.html">Шаблони</a>
   <a href="#">Очікування</a>
   <a href="./login_form.html">Авторизація</a>
-  
 	  <div class="form">
 	  <!--
 		<form class="register-form">
@@ -23,35 +24,18 @@
 		</form>
 		-->
 		<form ation="" class="login-form" id="loginForm">
-		  <label for="patternTag" class="message">Група шаблонів</label>
-		  <select id="patternTag">
-			  <option value="">-- Всі групи --</option>
-		  </select>
-		  
-		  <label for="patternName" class="message">Назва шаблону</label>
-		  <select id="patternName">
-		  </select>
-		  
-		  <label for="patternText" class="message">Текст шаблону</label>
-		  <textarea id="patternText" rows="8"> 
-		  </textarea>
-		  
-		  <!--
+		  <label for="username" class="message">Ім'я користувача</label>
 		  <input id="username" type="text" placeholder="Ім'я користувача"/>
 		  <label for="password" class="message">Пароль</label>
 		  <input id="password" type="password" placeholder="Пароль"/>
-		  -->
-		  <button type="submit">Вставити текст</button>
-		  
+		  <button type="submit">Зберегти</button>
 		  <!--
 		  <p class="message">Not registered? <a href="#">Create an account</a></p>
 		  -->
 		</form>
-		<!--<button id="loadToServer" style="display: none;"> -->
-		<button id="loadToServer">Завантажити на сервер</button>
 	  </div>
 	</div>
-  <script src="pattern_form.js"></script>
+  <script src="login_form.js"></script>
 </body>
 
 </html>
