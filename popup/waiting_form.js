@@ -40,16 +40,7 @@ waitingForm.addEventListener("submit", (e) => {
 		cell1.innerHTML = customer.value;
 		cell2.innerHTML = '<button type="button" name="remove">Видалити</button>'; 
 
-		let buttons = document.querySelectorAll("table button");
-		  customersTable.addEventListener('click', (e) => {
-			if (e.target.nodeName === 'BUTTON' && e.target.name === 'remove') {
-				//customers = customers.filter(el => el!==e.target.closest('tr').cells[0].innerHTML)
-				customers.splice(customers.indexOf(e.target.closest('tr').cells[0].innerHTML),1);
-				setData(customers);
-				console.log('customers',customers);
-			  e.target.closest('tr').remove();
-			}
-		  });
+		
 
 	  waitingForm.reset();
 
@@ -59,6 +50,18 @@ waitingForm.addEventListener("submit", (e) => {
 
   // handle submit
 });
+
+
+let buttons = document.querySelectorAll("table button");
+		  customersTable.addEventListener('click', (e) => {
+			if (e.target.nodeName === 'BUTTON' && e.target.name === 'remove') {
+				//customers = customers.filter(el => el!==e.target.closest('tr').cells[0].innerHTML)
+				customers.splice(customers.indexOf(e.target.closest('tr').cells[0].innerHTML),1);
+				setData(customers);
+				console.log('customers',customers);
+			  e.target.closest('tr').remove();
+			}
+		  });
 
 
 
