@@ -52,7 +52,7 @@ async function modTicket(columns) {
 	
 	await delay();
 	
-	console.log('modTicket');
+	//console.log('modTicket');
 	
     const now = new Date();
     const minute = now.getMinutes();
@@ -153,7 +153,7 @@ async function modTicket(columns) {
 		for (let i = 0; i < rows.length; i++) {			
 			const customer = getInnerText(rows[i],customerNameId);
 			
-			console.log('customers', customers, customer, customers.includes(customer));			
+			//console.log('customers', customers, customer, customers.includes(customer));			
 			
 			customers.forEach( cust => {
 				if (customer.toUpperCase().indexOf(cust.toUpperCase())>=0) {
