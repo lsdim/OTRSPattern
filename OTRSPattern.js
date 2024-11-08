@@ -33,7 +33,8 @@ Add copySelection() as a listener to mouseup events.
 
 //**********************************************************************************************
 //const intervalID = setInterval(checkNewTicket, 60000, columns);
-modTicket(columns) ;
+modTicket(columns);
+
 
 async function modTicket(columns) {
     const now = new Date();
@@ -110,17 +111,51 @@ async function modTicket(columns) {
     const customerNameId = columns.findIndex(el => el === "Ім'я клієнта");
     const ticketTagId = columns.findIndex(el => el === 'Тег заявки');
     const queueId = columns.findIndex(el => el === 'Черга');
+	
+	let customers = [];
+
+    try {
+        const gettingItem = await browser.storage.local.get('customers');
+        customers = gettingItem.customers ? [...gettingItem.customers] : [];
+    } catch (error) {
+        console.error('Error getting customers from storage:', error);
+    }
+	
+	
 
     if (rows.length > 0) {
+		
         for (let i = 0; i < rows.length; i++) {
             const ticketURL = getTicketURL(rows[i], ticketNumId);
             const ticketText = await getTicketText(ticketURL); // Асинхронний виклик
 				
 			setTitleText(rows[i], ticketNumId, ticketText);
+			
+			
+			const customer = getInnerText(rows[i],customerNameId);
+			
+			console.log('customers', customers, customer, customers.includes(customer));			
+			
+			customers.forEach( cust => {
+				if (customer.toUpperCase().indexOf(cust.toUpperCase())>=0) {
+					
+					rows[i].querySelectorAll('td').forEach(td => {
+						td.style.backgroundColor = '#28a745';
+						td.style.color = 'white';
+					});
+				}
+			})
 
         }
 
     }
+	
+	document.querySelectorAll('.Pagination a').forEach(link => {
+		console.log('link',link);
+		link.addEventListener('click', function () {
+			modTicket(columns);			
+		});
+	});
 }
 
 
