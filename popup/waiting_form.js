@@ -8,8 +8,11 @@ let customersTable = document.getElementById("customersTable");
 let customers = [];
 
  getData('customers').then(value => {
-		customers = value ? [...value] : []
-       console.log('customers', customers);
+		customers = value ? [...value] : [];
+		
+		customers.forEach(customer => addRow(customer));
+		
+       //console.log('customers', customers);
  });
 
 
@@ -25,22 +28,7 @@ waitingForm.addEventListener("submit", (e) => {
 	  //changeIcon();
 	  customers.push(customer.value);
 	  setData(customers);
-	 // alert("Збережено!");
-	  
-	  
-
-		// Create an empty <tr> element and add it to the 1st position of the table:
-		const row = customersTable.insertRow(0);
-
-		// Insert new cells (<td> elements) at the 1st and 2nd position of the "new" <tr> element:
-		const cell1 = row.insertCell(0);
-		const cell2 = row.insertCell(1);
-
-		// Add some text to the new cells:
-		cell1.innerHTML = customer.value;
-		cell2.innerHTML = '<button type="button" name="remove">Видалити</button>'; 
-
-		
+	  addRow(customer.value);	 
 
 	  waitingForm.reset();
 
@@ -50,6 +38,8 @@ waitingForm.addEventListener("submit", (e) => {
 
   // handle submit
 });
+
+
 
 
 let buttons = document.querySelectorAll("table button");
@@ -64,6 +54,18 @@ let buttons = document.querySelectorAll("table button");
 		  });
 
 
+		  
+function addRow(customer){
+	
+		const row = customersTable.insertRow(0);
+
+		const cell1 = row.insertCell(0);
+		const cell2 = row.insertCell(1);
+
+		cell1.innerHTML = customer;
+		cell2.innerHTML = '<button type="button" name="remove">Видалити</button>'; 
+	
+}
 
 /*
 browser.pageAction.onClicked.addListener((tab) => {
