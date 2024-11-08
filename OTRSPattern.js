@@ -35,8 +35,25 @@ Add copySelection() as a listener to mouseup events.
 //const intervalID = setInterval(checkNewTicket, 60000, columns);
 modTicket(columns);
 
+async function delay() {
+	
+	const tmp = document.getElementsByClassName('Loading');
+	await new Promise(resolve => setTimeout(resolve, 200));
+	if (tmp.length>0) {
+		await delay();
+	}
+	
+	
+	return;
+}
+
 
 async function modTicket(columns) {
+	
+	await delay();
+	
+	console.log('modTicket');
+	
     const now = new Date();
     const minute = now.getMinutes();
     const hours = now.getHours();
@@ -122,16 +139,18 @@ async function modTicket(columns) {
     }
 	
 	
+		document.querySelectorAll('.Pagination a').forEach(link => {
+			//console.log('link',link);
+			link.addEventListener('click', function () {
+				modTicket(columns);			
+			});
+		});
+	
+	
 
     if (rows.length > 0) {
 		
-        for (let i = 0; i < rows.length; i++) {
-            const ticketURL = getTicketURL(rows[i], ticketNumId);
-            const ticketText = await getTicketText(ticketURL); // Асинхронний виклик
-				
-			setTitleText(rows[i], ticketNumId, ticketText);
-			
-			
+		for (let i = 0; i < rows.length; i++) {			
 			const customer = getInnerText(rows[i],customerNameId);
 			
 			console.log('customers', customers, customer, customers.includes(customer));			
@@ -145,17 +164,18 @@ async function modTicket(columns) {
 					});
 				}
 			})
-
+        }
+		
+        for (let i = 0; i < rows.length; i++) {
+            const ticketURL = getTicketURL(rows[i], ticketNumId);
+            const ticketText = await getTicketText(ticketURL); // Асинхронний виклик
+				
+			setTitleText(rows[i], ticketNumId, ticketText);
         }
 
     }
 	
-	document.querySelectorAll('.Pagination a').forEach(link => {
-		console.log('link',link);
-		link.addEventListener('click', function () {
-			modTicket(columns);			
-		});
-	});
+
 }
 
 
