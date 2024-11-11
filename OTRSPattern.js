@@ -130,15 +130,18 @@ async function modTicket(columns) {
     const queueId = columns.findIndex(el => el === 'Черга');
 	
 	let customers = [];
+	
+	await getData('customers').then(value => {
+			customers = value ? [...value] : [];			
+	 });
 
-    try {
-        const gettingItem = await browser.storage.local.get('customers');
-        customers = gettingItem.customers ? [...gettingItem.customers] : [];
-    } catch (error) {
-        console.error('Error getting customers from storage:', error);
-    }
+
+	let ticketsBlock = [];	
 	
-	
+	 await getData('ticketsBlock').then(value => {
+			ticketsBlock = value ? [...value] : [];			
+	 });
+
 		document.querySelectorAll('.Pagination a').forEach(link => {
 			//console.log('link',link);
 			link.addEventListener('click', function () {
@@ -150,26 +153,43 @@ async function modTicket(columns) {
 
     if (rows.length > 0) {
 		
-		for (let i = 0; i < rows.length; i++) {			
-			const customer = getInnerText(rows[i],customerNameId);
-			
-			//console.log('customers', customers, customer, customers.includes(customer));			
-			
-			customers.forEach( cust => {
-				if (customer.toUpperCase().indexOf(cust.toUpperCase())>=0) {
+		if (customers.length>0 || ticketsBlock.length>0) {
+			for (let i = 0; i < rows.length; i++) {			
+				const customer = getInnerText(rows[i],customerNameId);
+				const ticketNum = getInnerText(rows[i],ticketNumId);
+				const ticketState = getInnerText(rows[i], stateId);
+				
+				//console.log('customers', customers, customer, customers.includes(customer));			
+				
+				customers.forEach( cust => {
+					if (customer.toUpperCase().indexOf(cust.toUpperCase())>=0) {
+						
+						rows[i].querySelectorAll('td').forEach(td => {
+							td.style.backgroundColor = '#28a745';
+							td.style.color = 'white';
+						});
+					}
+				})
+				
+				if (ticketsBlock.includes(ticketNum) && ticketState === 'Призначена') {			
 					
-					rows[i].querySelectorAll('td').forEach(td => {
-						td.style.backgroundColor = '#28a745';
-						td.style.color = 'white';
-					});
+					const ticketURL = getTicketURL(rows[i], ticketNumId);;
+					const block = await blockTicket(ticketURL);
+					if (block) {
+						
+						ticketsBlock.splice(ticketsBlock.indexOf(ticketNum),1);
+						await setData('ticketsBlock', ticketsBlock);
+						rows[i].querySelectorAll('td').forEach(td => {
+								td.style.backgroundColor = 'rgb(236, 144, 115)';//'#28a745';
+								td.style.color = 'white';
+							});
+					}
 				}
-			})
-			
-			/*
-			const loc = document.getElementById('nav-Lock');
-			console.log(loc.children[0].href) 
-			*/
-        }
+				
+			}
+		}
+		
+		
 		
         for (let i = 0; i < rows.length; i++) {
             const ticketURL = getTicketURL(rows[i], ticketNumId);
@@ -498,6 +518,52 @@ async function checkNewTicket(columns) {
     }
 }
 
+async function blockTicket(url) {
+	try {
+        const responseID = await fetch(url);
+        if (!responseID.ok) {
+            throw new Error('Network response was not ok for the first fetch');
+			return false;
+        }
+
+        const textTicket = await responseID.text();		
+		const blockURL = getBlockUrl(textTicket);
+
+
+        if (!blockURL) {
+            throw new Error('Block URL not found');
+			return false;
+        }
+
+        /*const response2 = await fetch(blockURL);
+        if (!response2.ok) {
+            throw new Error('Network response was not ok for the second fetch');
+        }*/
+		
+		console.log('block', blockURL);
+	
+        return true;
+    } catch (error) {
+        console.error('There has been a problem with your fetch operation:', error);
+		return false;
+    }
+}
+
+function getBlockUrl(textTicket) {
+	//const htmlTicket = stringToHTML(textTicket);
+	
+	const parser = new DOMParser();
+    const htmlTicket = parser.parseFromString(textTicket, 'text/html');
+		
+	const loc = htmlTicket.getElementById('nav-Lock');	
+	if (loc) {
+		return loc.children[0].href;
+	}
+	
+	return false;
+
+}
+
 async function getTicketText(url) {	
     try {
         const responseID = await fetch(url);
@@ -588,7 +654,22 @@ async function getArticleText(text, articleId) {
 	}
 }
 
-//**************************************	
+//**************************************
+
+async function setData(key, value) {
+	try {
+            await browser.storage.local.set({ [key]: value });
+        } catch (error) {
+            console.error(`Error setting ${key} to storage:`, error);
+        }
+		
+}
+
+async function getData(key) {
+	const gettingItem = await browser.storage.local.get(key);
+    //console.log('gettingItem', gettingItem[key]);
+    return gettingItem[key];
+}	
 
 
 //*************Login***********************
