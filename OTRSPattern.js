@@ -164,6 +164,11 @@ async function modTicket(columns) {
 					});
 				}
 			})
+			
+			/*
+			const loc = document.getElementById('nav-Lock');
+			console.log(loc.children[0].href) 
+			*/
         }
 		
         for (let i = 0; i < rows.length; i++) {

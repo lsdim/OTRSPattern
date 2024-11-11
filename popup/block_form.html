@@ -10,7 +10,7 @@
 
 <body>
   <div class="login-page">
-      <a href="./Pattern_form.html">Шаблони</a>
+	  <a href="./Pattern_form.html">Шаблони</a>
 	  <a href="./waiting_form.html">Очікування</a>
 	  <a href="./block_form.html">Блокування</a>
 	  <a href="./login_form.html">Авторизація</a>
@@ -24,16 +24,16 @@
 		  <p class="message">Already registered? <a href="#">Sign In</a></p>
 		</form>
 		-->
-		<form ation="" class="login-form" id="waitingForm">
-		  <label for="customer" class="message">Індекс або ПІБ заявника</label>
-		  <input id="customer" type="text" placeholder="Індекс або ПІБ заявника"/>
+		<form ation="" class="login-form" id="blockForm">
+		  <label for="ticketNum" class="message">Номер зявки для блокування</label>
+		  <input id="ticketNum" type="text" placeholder="Номер заявки"/>
 		  <button type="submit">Додати</button>	  
 		  <!--
 		  <p class="message">Not registered? <a href="#">Create an account</a></p>
 		  -->
 		</form>
 			
-		<table id="customersTable">
+		<table id="ticketsTable">
 		  <tbody>
 		  </tbody>		  
 		</table>
@@ -41,7 +41,7 @@
 		
 	  </div>
 	</div>
-  <script src="waiting_form.js"></script>
+  <script src="block_form.js"></script>
 </body>
 
 </html>
