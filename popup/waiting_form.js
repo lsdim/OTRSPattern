@@ -1,22 +1,22 @@
 ﻿
 const waitingForm = document.getElementById('waitingForm');
 
-const customer = document.getElementById("customer");
+const waiting = document.getElementById("waiting");
 
-let customersTable = document.getElementById("customersTable");
+let waitingListTable = document.getElementById("waitingListTable");
 
 const columnName = document.getElementById("columnName");
 
-let customers = [];
+let waitingList = [];
 
 let columns = [];
 
- getData('customers').then(value => {
-		customers = value ? [...value] : [];
+ getData('waitingList').then(value => {
+		waitingList = value ? [...value] : [];
 		
-		customers.forEach(customer => addRow(customer));
+		waitingList.forEach(value => addRow(value.data, value.col));
 		
-       //console.log('customers', customers);
+       //console.log('waitingList', waitingList);
  });
  
   getData('columns').then(value => {
@@ -38,9 +38,9 @@ let columns = [];
  });
  
  function setDefaultSelect(colName) {
-	 const customerNameId = columns.findIndex(el => el === colName);
-		if (customerNameId>=0) {
-			columnName.value = customerNameId;
+	 const colNameId = columns.findIndex(el => el === colName);
+		if (colNameId>=0) {
+			columnName.value = colNameId;
 		}
  }
 
@@ -50,15 +50,18 @@ waitingForm.addEventListener("submit", (e) => {
   
   
 
-  if (customer.value == "") {
+  if (waiting.value == "") {
     alert("Заповніть поле!");
   } else {
 	  
 	  //changeIcon();
-	  customers.push(customer.value);
-	  setData(customers);
-	  addRow(customer.value);
-	  const col = columnName.value;	
+	  const col = columnName.value;
+	  const optionText = columnName.querySelector(`option[value="${col}"]`).textContent;
+	  console.log('submit', optionText);
+	  waitingList.push({'data': waiting.value, 'col': optionText});
+	  setData(waitingList);
+	  addRow(waiting.value, optionText);
+	  	
 
 	  waitingForm.reset();
 	  columnName.value = col;
@@ -74,27 +77,34 @@ waitingForm.addEventListener("submit", (e) => {
 
 
 let buttons = document.querySelectorAll("table button");
-		  customersTable.addEventListener('click', (e) => {
+		  waitingListTable.addEventListener('click', (e) => {
 			if (e.target.nodeName === 'BUTTON' && e.target.name === 'remove') {
-				//customers = customers.filter(el => el!==e.target.closest('tr').cells[0].innerHTML)
-				customers.splice(customers.indexOf(e.target.closest('tr').cells[0].innerHTML),1);
-				setData(customers);
-				console.log('customers',customers);
+				//waitingList = waitingList.filter(el => el!==e.target.closest('tr').cells[0].innerHTML)
+				waitingList.splice(waitingList.findIndex(element => element.data === e.target.closest('tr').cells[1].innerHTML &&
+				element.col === e.target.closest('tr').cells[0].innerHTML),1);
+				setData(waitingList);
+				console.log('waitingList',waitingList);
 			  e.target.closest('tr').remove();
 			}
 		  });
 
 
 		  
-function addRow(customer){
+function addRow(data, column){
 	
-		const row = customersTable.insertRow(0);
+		const row = waitingListTable.insertRow(0);
 
 		const cell1 = row.insertCell(0);
 		const cell2 = row.insertCell(1);
+		const cell3 = row.insertCell(2);
 
-		cell1.innerHTML = customer;
-		cell2.innerHTML = '<button type="button" name="remove">Видалити</button>'; 
+		cell1.innerHTML = column;
+		cell2.innerHTML = data;
+		cell3.innerHTML = '<button type="button" name="remove">Видалити</button>'; 
+		
+		cell1.style.width = "40%";
+		cell2.style.width = "40%";
+		cell3.style.width = "20%";
 	
 }
 
@@ -122,9 +132,9 @@ async function changeIcon() {
 
 */
 
-async function setData(customers) {
+async function setData(waitingList) {
 	try {
-            await browser.storage.local.set({ 'customers': customers });
+            await browser.storage.local.set({ 'waitingList': waitingList });
         } catch (error) {
             console.error('Error setting tickets to storage:', error);
         }
