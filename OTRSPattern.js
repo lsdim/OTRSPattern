@@ -127,10 +127,10 @@ async function modTicket(columns) {
     const ticketTagId = columns.findIndex(el => el === 'Тег заявки');
     const queueId = columns.findIndex(el => el === 'Черга');
 	
-	let customers = [];
+	let waitingList = [];
 	
-	await getData('customers').then(value => {
-			customers = value ? [...value] : [];			
+	await getData('waitingList').then(value => {
+			waitingList = value ? [...value] : [];			
 	 });
 
 
@@ -151,16 +151,19 @@ async function modTicket(columns) {
 
     if (rows.length > 0) {
 		
-		if (customers.length>0 || ticketsBlock.length>0) {
+		if (waitingList.length>0 || ticketsBlock.length>0) {
 			for (let i = 0; i < rows.length; i++) {			
-				const customer = getInnerText(rows[i],customerNameId);
+				
 				const ticketNum = getInnerText(rows[i],ticketNumId);
 				const ticketState = getInnerText(rows[i], stateId);
 				
-				//console.log('customers', customers, customer, customers.includes(customer));			
+				//console.log('waitingList', waitingList, customer, waitingList.includes(customer));			
 				
-				customers.forEach( cust => {
-					if (customer.toUpperCase().indexOf(cust.toUpperCase())>=0) {
+				waitingList.forEach( wait => {
+					
+					const colId = columns.findIndex(el => el === wait.col);
+					const valueText = getInnerText(rows[i],colId);
+					if (valueText.toUpperCase().indexOf(wait.data.toUpperCase())>=0) {
 						
 						rows[i].querySelectorAll('td').forEach(td => {
 							td.style.backgroundColor = '#28a745';
