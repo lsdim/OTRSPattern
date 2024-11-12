@@ -127,19 +127,6 @@ async function modTicket(columns) {
     const ticketTagId = columns.findIndex(el => el === 'Тег заявки');
     const queueId = columns.findIndex(el => el === 'Черга');
 	
-	let waitingList = [];
-	
-	await getData('waitingList').then(value => {
-			waitingList = value ? [...value] : [];			
-	 });
-
-
-	let ticketsBlock = [];	
-	
-	 await getData('ticketsBlock').then(value => {
-			ticketsBlock = value ? [...value] : [];			
-	 });
-
 		document.querySelectorAll('.Pagination a').forEach(link => {
 			//console.log('link',link);
 			link.addEventListener('click', function () {
@@ -149,60 +136,10 @@ async function modTicket(columns) {
 	
 	
 
-    if (rows.length > 0) {
-		
-		if (waitingList.length>0 || ticketsBlock.length>0) {
-			for (let i = 0; i < rows.length; i++) {			
-				
-				const ticketNum = getInnerText(rows[i],ticketNumId);
-				const ticketState = getInnerText(rows[i], stateId);
-				
-				//console.log('waitingList', waitingList, customer, waitingList.includes(customer));			
-				
-				waitingList.forEach( wait => {
-					
-					const colId = columns.findIndex(el => el === wait.col);
-					const valueText = getInnerText(rows[i],colId);
-					if (valueText.toUpperCase().indexOf(wait.data.toUpperCase())>=0) {
-						
-						rows[i].querySelectorAll('td').forEach(td => {
-							td.style.backgroundColor = '#28a745';
-							td.style.color = 'white';
-						});
-						
-					}
-				})
-				
-				if (ticketsBlock.includes(ticketNum)) {		
-
-					if (ticketState === 'Призначена') {
-						const ticketURL = getTicketURL(rows[i], ticketNumId);;
-						const block = await blockTicket(ticketURL);
-						if (block) {							
-							ticketsBlock.splice(ticketsBlock.indexOf(ticketNum),1);
-							await updTiketBlock(rows[i], '#fec33e', 'white', ticketsBlock);
-						} else {
-							ticketsBlock.splice(ticketsBlock.indexOf(ticketNum),1);
-							await updTiketBlock(rows[i], 'rgb(236, 144, 115)', 'white', ticketsBlock);
-						}
-					} else {
-						ticketsBlock.splice(ticketsBlock.indexOf(ticketNum),1);
-						await updTiketBlock(rows[i], 'rgb(236, 144, 115)', 'white', ticketsBlock);
-					}					
-				}
-				
-			}
-		}
-		
-		
-		
-        for (let i = 0; i < rows.length; i++) {
-            const ticketURL = getTicketURL(rows[i], ticketNumId);
-            const ticketText = await getTicketText(ticketURL); // Асинхронний виклик
-				
-			setTitleText(rows[i], ticketNumId, ticketText);
-        }
-
+    if (rows.length > 0) {		
+		checkWaitingList(rows);
+		checkBlockList(rows, ticketNumId, stateId);		
+		addTitle(rows, ticketNumId);
     }
 	
 
@@ -521,6 +458,85 @@ async function checkNewTicket(columns) {
             sendMessage('<tg-emoji emoji-id="5368324170671202286">😎</tg-emoji> На даний момент необроблених заявок немає');
         }
     }
+}
+
+
+
+
+
+
+
+async function addTitle(rows, ticketNumId){
+	for (let i = 0; i < rows.length; i++) {
+            const ticketURL = getTicketURL(rows[i], ticketNumId);
+            const ticketText = await getTicketText(ticketURL); // Асинхронний виклик
+				
+			setTitleText(rows[i], ticketNumId, ticketText);
+        }
+}
+
+
+async function checkWaitingList(rows){
+	
+	let waitingList = [];
+	
+	await getData('waitingList').then(value => {
+			waitingList = value ? [...value] : [];			
+	 });
+	if (waitingList.length>0) {
+			for (let i = 0; i < rows.length; i++) {			
+				
+				waitingList.forEach( wait => {
+					
+					const colId = columns.findIndex(el => el === wait.col);
+					const valueText = getInnerText(rows[i],colId);
+					if (valueText.toUpperCase().indexOf(wait.data.toUpperCase())>=0) {
+						
+						rows[i].querySelectorAll('td').forEach(td => {
+							td.style.backgroundColor = '#28a745';
+							td.style.color = 'white';
+						});
+						
+					}
+				})				
+			}
+		}
+}
+
+async function checkBlockList(rows, ticketNumId, stateId){
+	
+	let ticketsBlock = [];	
+	
+	 await getData('ticketsBlock').then(value => {
+			ticketsBlock = value ? [...value] : [];			
+	 });
+	 
+	if (ticketsBlock.length>0) {
+			for (let i = 0; i < rows.length; i++) {			
+				
+				const ticketNum = getInnerText(rows[i],ticketNumId);
+				const ticketState = getInnerText(rows[i], stateId);
+						
+				if (ticketsBlock.includes(ticketNum)) {		
+
+					if (ticketState === 'Призначена') {
+						const ticketURL = getTicketURL(rows[i], ticketNumId);;
+						const block = await blockTicket(ticketURL);
+						if (block) {							
+							ticketsBlock.splice(ticketsBlock.indexOf(ticketNum),1);
+							await updTiketBlock(rows[i], '#fec33e', 'white', ticketsBlock);
+						} else {
+							ticketsBlock.splice(ticketsBlock.indexOf(ticketNum),1);
+							await updTiketBlock(rows[i], 'rgb(236, 144, 115)', 'white', ticketsBlock);
+						}
+					} else {
+						ticketsBlock.splice(ticketsBlock.indexOf(ticketNum),1);
+						await updTiketBlock(rows[i], 'rgb(236, 144, 115)', 'white', ticketsBlock);
+					}					
+				}
+				
+			}
+		}
 }
 
 async function blockTicket(url) {
