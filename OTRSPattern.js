@@ -168,22 +168,26 @@ async function modTicket(columns) {
 							td.style.backgroundColor = '#28a745';
 							td.style.color = 'white';
 						});
+						
 					}
 				})
 				
-				if (ticketsBlock.includes(ticketNum) && ticketState === 'Призначена') {			
-					
-					const ticketURL = getTicketURL(rows[i], ticketNumId);;
-					const block = await blockTicket(ticketURL);
-					if (block) {
-						
+				if (ticketsBlock.includes(ticketNum)) {		
+
+					if (ticketState === 'Призначена') {
+						const ticketURL = getTicketURL(rows[i], ticketNumId);;
+						const block = await blockTicket(ticketURL);
+						if (block) {							
+							ticketsBlock.splice(ticketsBlock.indexOf(ticketNum),1);
+							await updTiketBlock(rows[i], '#fec33e', 'white', ticketsBlock);
+						} else {
+							ticketsBlock.splice(ticketsBlock.indexOf(ticketNum),1);
+							await updTiketBlock(rows[i], 'rgb(236, 144, 115)', 'white', ticketsBlock);
+						}
+					} else {
 						ticketsBlock.splice(ticketsBlock.indexOf(ticketNum),1);
-						await setData('ticketsBlock', ticketsBlock);
-						rows[i].querySelectorAll('td').forEach(td => {
-								td.style.backgroundColor = 'rgb(236, 144, 115)';//'#28a745';
-								td.style.color = 'white';
-							});
-					}
+						await updTiketBlock(rows[i], 'rgb(236, 144, 115)', 'white', ticketsBlock);
+					}					
 				}
 				
 			}
@@ -561,7 +565,16 @@ function getBlockUrl(textTicket) {
 	}
 	
 	return false;
+}
 
+async function updTiketBlock(row, bgColor, color, ticketsBlock){
+
+	await setData('ticketsBlock', ticketsBlock);
+	
+	row.querySelectorAll('td').forEach(td => {
+		td.style.backgroundColor = bgColor;
+		td.style.color = color;
+	});
 }
 
 async function getTicketText(url) {	
