@@ -111,9 +111,7 @@ async function modTicket(columns) {
     }
 	
 	
-	if (window.location.href != 'http://help.ukrposhta.loc/otrs/index.pl?Action=AgentDashboard' &&
-		window.location.href != 'http://help.ukrposhta.loc/otrs/index.pl?') {
-		console.log('Not Dashboard', window.location.href);
+	if (!isDashboard()) {
 		return;
 	}
 
@@ -778,13 +776,28 @@ function getKindTicket(count) {
 }
 
 function getColumns() {
+	if (!isDashboard()) {
+		return [];
+	}
 	let columns = [];
 	const headers = document.getElementsByClassName("DashboardHeader");
 
 	for (let i=0; i<headers.length; i++) {
 		columns.push(headers[i].children[0].title.split(',')[0]);	
 	}
+	
+	setData('columns', columns);
 	return columns;
+}
+
+function isDashboard() {
+	if (window.location.href != 'http://help.ukrposhta.loc/otrs/index.pl?Action=AgentDashboard' &&
+		window.location.href != 'http://help.ukrposhta.loc/otrs/index.pl?') {
+		console.log('Not Dashboard', window.location.href);
+		return false;
+	}
+	
+	return true;
 }
 
 function getInnerText(row, id) {

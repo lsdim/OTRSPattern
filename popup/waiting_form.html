@@ -25,8 +25,13 @@
 		</form>
 		-->
 		<form ation="" class="login-form" id="waitingForm">
-		  <label for="customer" class="message">Індекс або ПІБ заявника</label>
-		  <input id="customer" type="text" placeholder="Індекс або ПІБ заявника"/>
+		  <label for="columnName" class="message">Оберіть поле для пошуку</label>
+		  <select id="columnName">
+			  <option value="">-- Всі групи --</option>
+		  </select>
+		
+		  <label for="customer" class="message">Введіть дані для пошуку</label>
+		  <input id="customer" type="text" placeholder="Дані для пошуку"/>
 		  <button type="submit">Додати</button>	  
 		  <!--
 		  <p class="message">Not registered? <a href="#">Create an account</a></p>

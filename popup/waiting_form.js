@@ -5,7 +5,11 @@ const customer = document.getElementById("customer");
 
 let customersTable = document.getElementById("customersTable");
 
+const columnName = document.getElementById("columnName");
+
 let customers = [];
+
+let columns = [];
 
  getData('customers').then(value => {
 		customers = value ? [...value] : [];
@@ -14,6 +18,31 @@ let customers = [];
 		
        //console.log('customers', customers);
  });
+ 
+  getData('columns').then(value => {
+		columns = value ? [...value] : [];
+		
+		columnName.innerHTML = null;
+		
+		
+		
+		columns.forEach((column, index) => {
+			let opt = document.createElement('option');
+			opt.value = index;
+			opt.innerHTML = column;
+			columnName.appendChild(opt);
+		});
+		
+		setDefaultSelect("Ім'я клієнта");
+		
+ });
+ 
+ function setDefaultSelect(colName) {
+	 const customerNameId = columns.findIndex(el => el === colName);
+		if (customerNameId>=0) {
+			columnName.value = customerNameId;
+		}
+ }
 
 
 waitingForm.addEventListener("submit", (e) => {
@@ -28,9 +57,11 @@ waitingForm.addEventListener("submit", (e) => {
 	  //changeIcon();
 	  customers.push(customer.value);
 	  setData(customers);
-	  addRow(customer.value);	 
+	  addRow(customer.value);
+	  const col = columnName.value;	
 
 	  waitingForm.reset();
+	  columnName.value = col;
 
   }
   
