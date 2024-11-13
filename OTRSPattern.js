@@ -32,7 +32,7 @@ Add copySelection() as a listener to mouseup events.
 
 
 //**********************************************************************************************
-//const intervalID = setInterval(checkNewTicket, 60000, columns);
+const intervalID = setInterval(modTicket, 60000, columns);
 modTicket(columns);
 
 async function delay() {
@@ -110,6 +110,17 @@ async function modTicket(columns) {
         return;
     }
 	
+	if (isTicketZoom()) {
+		
+		addTagToText();
+		const ip = document.getElementById('ip');
+		if (ip) {
+			ip.addEventListener("click", function() {
+				copySelection('ip');
+			});
+		}
+		
+	}
 	
 	if (!isDashboard()) {
 		return;
@@ -684,6 +695,65 @@ async function getArticleText(text, articleId) {
 	}
 }
 
+function addTagToText() {
+	
+	const ip = document.getElementById('ip');
+	if (ip) {
+		return;
+	}
+	
+	const article = document.getElementsByClassName('ArticleBody');
+
+	if (article.length>0) {
+		const articleText = article[0].innerHTML;
+		console.log('articleText',articleText);
+		const tmp1 = articleText.substring(0, articleText.indexOf('IP адреса'));
+		let tmp2 = articleText.substring(articleText.indexOf('IP адреса'),articleText.indexOf('Робоча група:'));
+		const tmp3 = articleText.substring(articleText.indexOf('Робоча група:')); 
+		
+		const tmp4Arr = tmp2.split(':'); 	
+		
+
+		tmp4Arr[1] = '<span style="cursor:pointer; background:#ffc107" id="ip">' + tmp4Arr[1].trim() + '</span>';
+		tmp2 = tmp4Arr.join(': ');
+		
+		console.log('tmp2',tmp2);
+
+		article[0].innerHTML = tmp1 + tmp2 + tmp3;
+		
+	}
+	
+}
+
+
+function selectText(elementId) {
+	
+    const element = document.getElementById(elementId);
+    
+    if (element) {
+        const selection = window.getSelection();
+        const range = document.createRange();
+        selection.removeAllRanges();
+        
+        range.selectNodeContents(element);
+        
+        selection.addRange(range);
+    }
+}
+
+function copySelection(elementId) {
+	
+	selectText(elementId);
+    let selectedText = window.getSelection().toString().trim();
+
+    if (selectedText) {
+        document.execCommand("Copy");
+		window.getSelection().removeAllRanges();
+		const element = document.getElementById(elementId);
+		element.style.background = '#28a745';
+    }
+}
+
 //**************************************
 
 async function setData(key, value) {
@@ -813,6 +883,16 @@ function isDashboard() {
 	if (window.location.href != 'http://help.ukrposhta.loc/otrs/index.pl?Action=AgentDashboard' &&
 		window.location.href != 'http://help.ukrposhta.loc/otrs/index.pl?') {
 		console.log('Not Dashboard', window.location.href);
+		return false;
+	}
+	
+	return true;
+}
+
+function isTicketZoom() {
+	const index = window.location.href.indexOf('http://help.ukrposhta.loc/otrs/index.pl?Action=AgentTicketZoom;'); 
+	if (index<0) {
+		//console.log('isTicketZoom', window.location.href, index);
 		return false;
 	}
 	
