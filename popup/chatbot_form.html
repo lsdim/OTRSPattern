@@ -27,24 +27,19 @@
 		  <p class="message">Already registered? <a href="#">Sign In</a></p>
 		</form>
 		-->
-		<form ation="" class="login-form" id="blockForm">
-		  <label for="ticketNum" class="message">Номер зявки для блокування</label>
-		  <input id="ticketNum" type="text" placeholder="Номер заявки"/>
-		  <button type="submit">Додати</button>	  
+		<form ation="" class="login-form" id="chatbotForm">
+		  <label for="botId" class="message">Telegram Id бота</label>
+		  <input id="botId" type="text" placeholder="Id бота"/>
+		  <label for="chatId" class="message">Telegram Id чату</label>
+		  <input id="chatId" type="text" placeholder="Id чату"/>
+		  <button type="submit">Зберегти</button>
 		  <!--
 		  <p class="message">Not registered? <a href="#">Create an account</a></p>
 		  -->
 		</form>
-			
-		<table id="ticketsTable">
-		  <tbody>
-		  </tbody>		  
-		</table>
-		
-		
 	  </div>
 	</div>
-  <script src="block_form.js"></script>
+  <script src="chatbot_form.js"></script>
 </body>
 
 </html>

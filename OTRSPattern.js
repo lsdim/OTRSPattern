@@ -14,23 +14,6 @@ const CHAT_ID = dev_chat;
 let columns = getColumns();
 
 
-/*
-copy the selected text to clipboard
-*/
-function copySelection() {
-    let selectedText = window.getSelection().toString().trim();
-
-    if (selectedText) {
-        document.execCommand("Copy");
-    }
-}
-
-/*
-Add copySelection() as a listener to mouseup events.
-*/
-//document.addEventListener("mouseup", copySelection);
-
-
 //**********************************************************************************************
 const intervalID = setInterval(modTicket, 30000, columns);
 modTicket(columns);
