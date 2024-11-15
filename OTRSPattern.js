@@ -32,15 +32,15 @@ Add copySelection() as a listener to mouseup events.
 
 
 //**********************************************************************************************
-const intervalID = setInterval(modTicket, 60000, columns);
+const intervalID = setInterval(modTicket, 30000, columns);
 modTicket(columns);
 
-async function delay() {
+async function delay(time) {
 	
 	const tmp = document.getElementsByClassName('Loading');
-	await new Promise(resolve => setTimeout(resolve, 200));
+	await new Promise(resolve => setTimeout(resolve, time));
 	if (tmp.length>0) {
-		await delay();
+		await delay(time);
 	}
 	
 	
@@ -50,7 +50,7 @@ async function delay() {
 
 async function modTicket(columns) {
 	
-	await delay();
+	await delay(200);
 	
 	//console.log('modTicket');
 	
@@ -111,6 +111,16 @@ async function modTicket(columns) {
     }
 	
 	if (isTicketZoom()) {
+		console.log('isTicketZoom()', isTicketZoom());
+		const row1 = document.getElementById('Row1');
+		if (row1) {	
+			/*console.log('row1',row1);
+			row1.addEventListener("click", function() {
+				delay(1000);
+				addTagToText();
+				console.log('addClick row1');
+			});*/
+		}
 		
 		addTagToText();
 		const ip = document.getElementById('ip');
@@ -706,7 +716,7 @@ function addTagToText() {
 
 	if (article.length>0) {
 		const articleText = article[0].innerHTML;
-		console.log('articleText',articleText);
+		//console.log('articleText',articleText);
 		const tmp1 = articleText.substring(0, articleText.indexOf('IP адреса'));
 		let tmp2 = articleText.substring(articleText.indexOf('IP адреса'),articleText.indexOf('Робоча група:'));
 		const tmp3 = articleText.substring(articleText.indexOf('Робоча група:')); 
