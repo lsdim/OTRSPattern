@@ -7,20 +7,33 @@ document.querySelectorAll('.menu a').forEach(link => {
 
 const chatbotForm = document.getElementById('chatbotForm');
 
+const chatActive = document.getElementById("isActive");
 const chatId = document.getElementById("chatId");
 const botId = document.getElementById("botId");
 
+let chatBot = {};
 
- getData('chatId').then(value => {
+checkboxChecked();
+
+
+chatActive.addEventListener("change", () => {
+	checkboxChecked();
+});
+
+ getData('chatBot').then(value => {
 		if (value) {
-			chatId.value = value;
+			chatBot = {...value};
+			chatId.value = chatBot.chatId;
+			botId.value = chatBot.botId;
+			chatActive.checked = chatBot.isActive;
+			checkboxChecked();
 		}
         
-		getData('botId').then(value => {
+		/*getData('botId').then(value => {
 			if (value) {
 				botId.value = value;
 			}			
-		});
+		});*/
  });
 
     
@@ -31,48 +44,35 @@ chatbotForm.addEventListener("submit", (e) => {
   
   
 
-  if (chatId.value == "" || botId.value == "") {
+  if (chatActive.checked && (chatId.value == "" || botId.value == "")) {
     alert("Заповніть обидва поля!");
   } else {
-	  
-	  //changeIcon();
-	  setData(chatId.value, botId.value);
+	  chatBot.chatId = chatId.value;
+	  chatBot.botId = botId.value;
+	  chatBot.isActive = chatActive.checked;
+	  setData(chatBot);
 	  alert("Збережено!");
 
   }
   
-  console.log('submit');
+  //console.log('submit');
 
   // handle submit
 });
 
-/*
-browser.pageAction.onClicked.addListener((tab) => {
-	console.log('pageAction');
-  browser.pageAction.setIcon({
-    tabId: tab.id,
-    path: {
-		19: "icons/otrs-19.png",
-		38: "icons/otrs-38.png"
-	},
-  });
-});
+function checkboxChecked() {
+	  if (chatActive.checked) {
+		chatId.disabled = false;
+		botId.disabled = false;
+	  } else {
+		chatId.disabled = true;
+		botId.disabled = true;
+	  }
+}
 
-async function changeIcon() {
-	let settingIcon = await browser.pageAction.setIcon({
-  path: {
-    19: "icons/otrs-19.png",
-	38: "icons/otrs-38.png"
-  },
-});
-
-};
-
-*/
-
-async function setData(chatId, botId) {
+async function setData(chatBot) {
 	try {
-            await browser.storage.local.set({ 'chatId': chatId, 'botId': botId });
+            await browser.storage.local.set({'chatBot': chatBot});
         } catch (error) {
             console.error('Error setting tickets to storage:', error);
         }
@@ -81,15 +81,8 @@ async function setData(chatId, botId) {
 
 async function getData(key) {
 	const gettingItem = await browser.storage.local.get(key);
-    console.log('gettingItem', gettingItem[key]);
+   // console.log('gettingItem', gettingItem[key]);
     return gettingItem[key];
 
 }
 
-function setItem() {
-  console.log("OK");
-}
-
-function onError(error) {
-  console.log(error);
-}

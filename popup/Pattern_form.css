@@ -26,6 +26,41 @@
   box-sizing: border-box;
   font-size: 14px;
 }
+
+.form input[type="checkbox"] {
+  appearance: none; /* Прибираємо стандартний вигляд чекбокса */
+  display: inline-block;
+  width: 5px;
+  height: 5px;
+  padding: 10px;
+  background: #f2f2f2;
+  border: 2px solid #ccc;
+  border-radius: 4px;
+  margin: 0 2px 3px 0;
+  vertical-align: middle;
+  cursor: pointer;
+  transition: background-color 0.3s, border-color 0.3s;
+}
+
+/* Стиль для активного стану чекбокса */
+.form input[type="checkbox"]:checked {
+  background: #4CAF50;
+  border-color: #4CAF50;
+}
+
+/* Додаємо галочку при активному стані */
+.form input[type="checkbox"]:checked::after {
+  content: "";
+  display: block;
+  width: 5px;
+  height: 10px;
+  border: solid white;
+  border-width: 0 3px 3px 0;
+  transform: rotate(45deg);
+  margin: -9px -3px;
+}
+
+
 .form select {
   font-family: "Roboto", sans-serif;
   outline: 0;
