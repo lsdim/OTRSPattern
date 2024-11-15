@@ -143,6 +143,41 @@ button[name="remove"]:hover, button[name="remove"]:active, button[name="remove"]
 	background: #e83e8c;
 }
 
+/* Загальний стиль для меню */
+.menu {
+    display: flex; /* Розташування елементів горизонтально */
+    justify-content: center; /* Вирівнювання посилань по центру */
+    background-color: #333; /* Тло меню */
+    padding: 2px 0; /* Відступи зверху та знизу */
+	max-width: 610px;
+	/*width: 500px*/
+	margin: 0 auto 0px;
+}
+
+/* Стиль для посилань */
+.menu a {
+    text-decoration: none; /* Забираємо підкреслення */
+    color: white; /* Колір тексту */
+    padding: 5px 10px; /* Відступи всередині кнопок */
+    font-size: 16px; /* Розмір тексту */
+    font-weight: bold; /* Жирний текст */
+    /*border-radius: 5px; /* Згладжені кути */
+    transition: background-color 0.3s, color 0.3s; /* Плавний перехід кольорів */
+}
+
+/* Стиль при наведенні */
+.menu a:hover {
+    background-color: #575757; /* Зміна кольору тла при наведенні */
+    color: #FFD700; /* Золотистий текст при наведенні */
+}
+
+/* Стиль для активного посилання */
+.menu a.active {
+    background-color: #FFD700; /* Золотистий фон для активного */
+    color: #333; /* Темний текст */
+}
+
+
 body {
   background: #eaece5 /*#76b852; *//* fallback for old browsers */
   background: rgb(234, 236, 229);

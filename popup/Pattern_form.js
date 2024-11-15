@@ -1,4 +1,11 @@
 ﻿
+document.querySelectorAll('.menu a').forEach(link => {
+    if (link.href === window.location.href) {
+        link.classList.add('active');
+    }
+});
+
+
 const DBUrl = 'https://otrs-patterns-default-rtdb.europe-west1.firebasedatabase.app/patterns.json';
 
 
