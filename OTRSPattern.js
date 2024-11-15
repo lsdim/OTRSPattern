@@ -7,7 +7,11 @@ const dev_chat = '-4228417669';
 const prod_chat = '-4267367123';
 
 const BOT_TOKEN = '7255647619:AAH0dKnIaCsFRx7Dg2qyezOWuum4ItZBkec';
-const CHAT_ID = dev_chat;
+//const CHAT_ID = dev_chat;
+
+let chatBot = {'isActive': false,
+				'chatId':'-4228417669',
+				'botId':'7255647619'};
 
 
 //document.body.style.border = "2px solid red";
@@ -25,7 +29,6 @@ async function delay(time) {
 	if (tmp.length>0) {
 		await delay(time);
 	}
-	
 	
 	return;
 }
@@ -138,7 +141,7 @@ async function modTicket(columns) {
 			});
 		});
 	
-	
+	getChatBot();
 
     if (rows.length > 0) {		
 		checkWaitingList(rows);
@@ -470,6 +473,14 @@ async function checkNewTicket(columns) {
 
 
 
+async function getChatBot(){
+	
+	await getData('chatBot').then(value => {
+			chatBot = value ? {...value} : {'isActive': false,'chatId':'-4228417669','botId':'7255647619'};			
+	 });	
+}
+
+
 async function addTitle(rows, ticketNumId){
 	for (let i = 0; i < rows.length; i++) {
             const ticketURL = getTicketURL(rows[i], ticketNumId);
@@ -494,12 +505,17 @@ async function checkWaitingList(rows){
 					
 					const colId = columns.findIndex(el => el === wait.col);
 					const valueText = getInnerText(rows[i],colId);
-					if (valueText.toUpperCase().indexOf(wait.data.toUpperCase())>=0) {
-						
+					if (valueText.toUpperCase().indexOf(wait.data.toUpperCase())>=0) {						
+											
 						rows[i].querySelectorAll('td').forEach(td => {
 							td.style.backgroundColor = '#28a745';
 							td.style.color = 'white';
 						});
+						
+						if (chatBot.isActive) {
+							sendMessage(BOT_TOKEN, chatBot.chatId, 'Є заявка, яка відповідає умові очікуванні: \t\n'
+							+ `${wait.col} - ${wait.data}`);
+						}
 						
 					}
 				})				
@@ -919,7 +935,7 @@ function getTicketURL(row, id) {
 	console.log('onGot', item);
 }*/
 
-function sendMessage(message) {
+function sendMessage(BOT_TOKEN, CHAT_ID, message) {
     const url = `https://api.telegram.org/bot${BOT_TOKEN}/sendMessage`;
     const data = {
         chat_id: CHAT_ID,
