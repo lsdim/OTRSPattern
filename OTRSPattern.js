@@ -816,8 +816,11 @@ function checkDialog() {
 
 function checkNetError() {
 	const errButt = document.getElementById('netErrorButtonContainer');
-	if (errButt) {
-		 
+	const errOTRS = document.getElementsByClassName('ErrorMessage');
+	//const errAjax = document.getElementById('AjaxErrorDialog');
+	
+	if (errButt || errOTRS.length>0) {	
+		//console.log(errButt, errOTRS.length);
 		return true
 	} else {
 		return false;
