@@ -44,18 +44,20 @@ async function modTicket(columns) {
     const minute = now.getMinutes();
     const hours = now.getHours();
 	
-	if (checkDialog()) {
+/*	if (checkDialog()) {
 		console.log('checkDialog');
 		window.location.reload();
 		return;
 	}
 	
+	*/
+/*	
 	if (checkNetError()) {
 		console.log('checkNetError');
 		window.location.reload();
 		return;
 	}
-	
+	*/
 
     if (checkLogin()) {
 		
