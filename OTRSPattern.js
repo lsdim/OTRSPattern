@@ -1,7 +1,7 @@
 
 console.log('start');
 
-const user = {};
+let user = {};
 
 const dev_chat = '-4228417669';
 const prod_chat = '-4267367123';
@@ -61,41 +61,31 @@ async function modTicket(columns) {
 
     if (checkLogin()) {
 		
-		try {
-			const gettingItem = await browser.storage.local.get('username');
-			user.username = gettingItem.username ? gettingItem.username : '';
-		} catch (error) {
-			console.error('Error getting username from storage:', error);
+		await getData('user').then(value => {
+			user = value ? { ...value } : {};			
+		});
+		
+		
+		if (user.isActive) {
+			const loginError = getLoginError();
+			console.log('loginError', loginError);
+			
+			if (user.username != '' && user.password != '') {
+				login();
+			}
+			
+			if (hours >= 8 && hours < 21) {						
+				if ([5, 20, 35, 50].includes(minute)) {
+					if (loginError) {
+						sendMessage('<blockquote>' + loginError + '</blockquote>\t\n' + getAnswer(answersLogin));
+					} else {
+						sendMessage(getAnswer(answersLogin));
+					}				
+					
+				}
+			}
+				return;
 		}
-		
-		try {
-			const gettingItem = await browser.storage.local.get('password');
-			user.password = gettingItem.password ? gettingItem.password : '';
-		} catch (error) {
-			console.error('Error getting password from storage:', error);
-		}
-		
-		//console.log('user', user.username);
-		//console.log('password', user.password);
-		
-		const loginError = getLoginError();
-		console.log('loginError', loginError);
-		
-		if (user.username != '' && user.password != '') {
-			login();
-		}
-		
-        if (hours >= 8 && hours < 21) {						
-            if ([5, 20, 35, 50].includes(minute)) {
-				if (loginError) {
-					sendMessage('<blockquote>' + loginError + '</blockquote>\t\n' + getAnswer(answersLogin));
-				} else {
-					sendMessage(getAnswer(answersLogin));
-				}				
-                
-            }
-        }
-        return;
     }
 	
 	if (isTicketZoom()) {
