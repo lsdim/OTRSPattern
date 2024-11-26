@@ -44,13 +44,13 @@ async function modTicket(columns) {
     const minute = now.getMinutes();
     const hours = now.getHours();
 	
-/*	if (checkDialog()) {
+	if (checkDialog()) {
 		console.log('checkDialog');
 		window.location.reload();
 		return;
 	}
 	
-	*/
+	
 /*	
 	if (checkNetError()) {
 		console.log('checkNetError');
@@ -459,7 +459,7 @@ async function checkNewTicket(columns) {
             console.error('Error setting tickets to storage:', error);
         }
 
-        if (hours >= 8 && hours < 21 && minute === 05) {
+        if (hours >= 8 && hours < 21 && minute === 5) {
             sendMessage(getAnswer(answersOnline));
         }
     } else {
@@ -577,11 +577,18 @@ async function blockTicket(url) {
             throw new Error('Block URL not found');
 			return false;
         }
-
-        /*const response2 = await fetch(blockURL);
+//*********************Comment if TEST */
+        const response2 = await fetch(blockURL);
         if (!response2.ok) {
-            throw new Error('Network response was not ok for the second fetch');
-        }*/
+			throw new Error('Network response was not ok for the second fetch');
+			if (chatBot.isActive) {
+				sendMessage(BOT_TOKEN, chatBot.chatId, 'Я, чесно, намагався заблокувати заявку, але... ');
+			}
+		} else {
+			if (chatBot.isActive) {
+				sendMessage(BOT_TOKEN, chatBot.chatId, 'Заблоковано заявку із списку');
+			}
+		}
 		
 		console.log('block', blockURL);
 	
@@ -812,8 +819,12 @@ function stringToHTML (text) {
 }
 
 function checkDialog() {
-	const dialog = document.getElementsByClassName('Dialog'); 
-	return dialog.length>0;
+	//const dialog = document.getElementsByClassName('Dialog'); 
+	const dialog = document.getElementById('DialogButton1');
+	if (dialog) {
+		return dialog.textContent === "Reload page";
+	}
+	return false;
 }
 
 function checkNetError() {
