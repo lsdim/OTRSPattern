@@ -9,18 +9,18 @@ const loginForm = document.getElementById('loginForm');
 
 const username = document.getElementById("username");
 const password = document.getElementById("password");
+const loginActive = document.getElementById("isActive");
+
+let user = {};
 
 
- getData('username').then(value => {
+ getData('user').then(value => {
 		if (value) {
-			username.value = value;
+      user = {...value};
+			username.value = user.username;
+			password.value = user.password;
+			loginActive.checked = user.isActive;
 		}
-        
-		getData('password').then(value => {
-			if (value) {
-				password.value = value;
-			}			
-		});
  });
 
     
@@ -35,44 +35,21 @@ loginForm.addEventListener("submit", (e) => {
     alert("Заповніть обидва поля!");
   } else {
 	  
-	  //changeIcon();
-	  setData(username.value, password.value);
+    user.username = username.value;
+	  user.password = password.value;
+	  user.isActive = loginActive.checked;
+	  setData(user);
 	  alert("Збережено!");
 
   }
   
   console.log('submit');
 
-  // handle submit
 });
 
-/*
-browser.pageAction.onClicked.addListener((tab) => {
-	console.log('pageAction');
-  browser.pageAction.setIcon({
-    tabId: tab.id,
-    path: {
-		19: "icons/otrs-19.png",
-		38: "icons/otrs-38.png"
-	},
-  });
-});
-
-async function changeIcon() {
-	let settingIcon = await browser.pageAction.setIcon({
-  path: {
-    19: "icons/otrs-19.png",
-	38: "icons/otrs-38.png"
-  },
-});
-
-};
-
-*/
-
-async function setData(username, password) {
+async function setData(user) {
 	try {
-            await browser.storage.local.set({ 'username': username, 'password': password });
+            await browser.storage.local.set({ 'user': user });
         } catch (error) {
             console.error('Error setting tickets to storage:', error);
         }
@@ -81,15 +58,7 @@ async function setData(username, password) {
 
 async function getData(key) {
 	const gettingItem = await browser.storage.local.get(key);
-    console.log('gettingItem', gettingItem[key]);
+    //console.log('gettingItem', gettingItem[key]);
     return gettingItem[key];
 
-}
-
-function setItem() {
-  console.log("OK");
-}
-
-function onError(error) {
-  console.log(error);
 }
