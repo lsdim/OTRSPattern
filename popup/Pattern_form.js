@@ -166,7 +166,10 @@ loadButton.addEventListener("click", (e) => {
   // handle submit
 });
 
-function clickPutText() {
+async function clickPutText() {
+	
+	const ticketText = await getTicketText();
+
 	loginForm.addEventListener("submit", (e) => {
 	  e.preventDefault();
 	  
@@ -182,7 +185,8 @@ function clickPutText() {
 	  function sendPutText(tabs) {
 		 browser.tabs.sendMessage(tabs[0].id, {
 			command: "putText",
-			textMessage: patternText.value
+			textMessage: patternText.value,
+			ticketMessage: ticketText
 		});
 	  }	 
 	  
@@ -190,9 +194,7 @@ function clickPutText() {
 	   window.close();
 
 	  // handle submit
-	});
-	
-	
+	});	
 }
 
 browser.tabs.executeScript({file: "/content_script/content_script.js"})
@@ -259,6 +261,23 @@ function runUpload(url, data) {
     .catch(error => {
         console.error('Error sending message:', error);
     });
+}
+
+async function getTicketText() {
+	let txt = '';
+	await getData('ticketTextClose').then(value => {
+		if (value) {
+			txt =  `Проблема: <br /> ${value} <br /> <br />`;
+		} 
+
+	});
+	return txt;
+}
+
+async function getData(key) {
+	const gettingItem = await browser.storage.local.get(key);
+    return gettingItem[key];
+
 }
 
 

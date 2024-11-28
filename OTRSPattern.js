@@ -144,6 +144,23 @@ async function modTicket(columns) {
 
 }
 
+if (isTicketZoom()) { 
+	const ticketClose = document.querySelector('#nav-Close a'); //.getElementById('nav-Close');
+		if (ticketClose) {
+			ticketClose.addEventListener("click", saveTicketText);
+		}
+}
+
+async function saveTicketText() {
+    const ticketURL = window.location.href;
+    const ticketText = await getTicketText(ticketURL); // Асинхронний виклик
+				
+	// console.log('ticketTextClose', ticketText.split('***')[0]);
+	const ticketTextClear = ticketText.split('***')[0];
+	await setData('ticketTextClose', ticketTextClear);
+
+}
+
 
 ///************************************************************************************************
 

@@ -9,7 +9,7 @@
   }
   window.hasRun = true;
 
-  function putTextInElement(text) {
+  function putTextInElement(text, ticketMessage) {
 	  const responseField = document.getElementsByClassName('cke_wysiwyg_frame'); //('cke_editable'); 
 	  //const responseField  = document.getElementById('RichText');
   
@@ -19,11 +19,18 @@
 		  return;
 	  }	  
 	  
-	  const newText = text.replace(/\r?\n/g, "<br />");	  
+	  let newText = text.replace(/\r?\n/g, "<br />");	  
 	  
 	  const textField = responseField[0].contentDocument.children[0].innerHTML;	  
 	  
-	  const textArr = textField.split('-------------------------------------------');
+    const textArr = textField.split('-------------------------------------------');
+    
+    
+    const location = window.location.href;
+   
+    if (location.indexOf('Action=AgentTicketClose') > -1) {      
+      newText = ticketMessage + newText;
+    }
 	  
 	  textArr[0] = textArr[0] + newText + '<br /><br />';
 	  responseField[0].contentDocument.children[0].innerHTML = textArr.join('-------------------------------------------');
@@ -50,8 +57,9 @@
    * Call "insertBeast()" or "removeExistingBeasts()".
    */
   browser.runtime.onMessage.addListener((message) => {
+    // console.log('message', message);
     if (message.command === "putText") {
-      putTextInElement(message.textMessage);
+      putTextInElement(message.textMessage, message.ticketMessage);
     };
   });
 })();
