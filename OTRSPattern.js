@@ -137,7 +137,8 @@ async function modTicket(columns) {
 
     if (rows.length > 0) {		
 		checkWaitingList(rows);
-		checkBlockList(rows, ticketNumId, stateId);		
+		checkBlockList(rows, ticketNumId, stateId);	
+		addWorkTime(rows, customerNameId)	
 		addTitle(rows, ticketNumId);
     }
 	
@@ -497,6 +498,130 @@ async function addTitle(rows, ticketNumId){
 				
 			setTitleText(rows[i], ticketNumId, ticketText);
         }
+}
+
+async function addWorkTime(rows, customerId){
+	for (let i = 0; i < rows.length; i++) {
+		const customerName = getInnerText(rows[i], customerId);
+		const customerIndex = customerName.split(' ')[0].trim();
+		if (customerIndex.length == 5 && !isNaN(customerIndex)) {
+			
+
+			const url = `https://index.ukrposhta.ua/endpoints-for-apps/index.php?method=get_postoffices_openhours_by_postindex&pc=${customerIndex}`;
+
+			try {
+				const workTime = await fetch(url);
+				if (!workTime.ok) {
+					throw new Error('Network response workTime was not ok');
+				}			
+
+				const jsonRez = await workTime.json();				
+
+				if (jsonRez.Entry) {
+					const openHours = jsonRez.Entry;
+					setColorByWorkTime(rows[i], customerId, openHours);
+					setTitleByWorkTime(rows[i], customerId, openHours);
+				}
+
+				// const article = getArticleID(htmlID);
+				// const articleURL = article.url;
+				
+				// //console.log('article', article);
+
+				// if (!articleURL) {
+				// 	throw new Error('Article URL not found');
+				// }
+
+				// //console.log(`${url}#${articleURL}`);
+				// const response2 = await fetch(`http://help.ukrposhta.loc${articleURL}`);
+				// if (!response2.ok) {
+				// 	throw new Error('Network response was not ok for the second fetch');
+				// }
+
+				// const html2 = await response2.text();		
+				// return getArticleText(html2, article.id);
+			} catch (error) {
+				console.error('Problem:', error);
+			}
+			
+		}
+            // const ticketURL = getTicketURL(rows[i], ticketNumId);
+            // const ticketText = await getTicketText(ticketURL); // Асинхронний виклик
+				
+			// setTitleText(rows[i], ticketNumId, ticketText);
+        }
+}
+
+function setTitleByWorkTime(row, id, openHours) {
+	const titleText = '';
+
+	const schedule = {};
+	const scheduleWork = [];
+
+	openHours.forEach(open => {
+
+		if (open.INTERVALTYPE === 'W') {
+			schedule[open.DAYOFWEEK_EN] = { ... { 'day': open.DAYOFWEEK_UA, 'tFrom': open.TFROM, 'tTo': open.TTO } }
+		}
+
+		if (open.INTERVALTYPE === 'D') {
+			schedule[open.DAYOFWEEK_EN] = {... {'pause': true, 'pauseFrom': open.TFROM, 'pauseTo': open.TTO} }
+		}
+
+	});
+
+	console.log('schedule', schedule);
+
+	setTitleText(row, id, titleText)
+
+}
+
+function setColorByWorkTime(row, id, openHours) {
+	const state = isOpen(openHours);
+	let color = 'black';
+
+	switch (state) {
+		case 'open': color = 'green';
+				break;
+		case 'pause': color = 'yellow';
+				break;
+		case 'close': color = 'red';
+				break;
+	};
+
+	row.children[id].style.color = color;
+}
+
+function isOpen(openHours) {
+	const now = new Date();
+	const today = now.getDay();
+	const minute = now.getMinutes();
+	const hours = now.getHours();
+
+	let state = 'close';
+
+	openHours.forEach(open => {
+		if (+open.DAYOFWEEK_NUM === today && open.INTERVALTYPE === 'D') {
+			const tFrom = open.TFROM.split(':');
+			const tTo = open.TTO.split(':');
+			if ((hours > +tFrom[0] || (hours === +tFrom[0] && minute >= +tFrom[1])) &&
+				(hours < +tTo[0] || (hours === +tTo[0] && minute < +tTo[1]))) {
+				// console.log('pause', open);
+				state = 'pause';
+			} 
+		}
+		if (+open.DAYOFWEEK_NUM === today && open.INTERVALTYPE === 'W') {
+			const tFrom = open.TFROM.split(':');
+			const tTo = open.TTO.split(':');
+			if ((hours > +tFrom[0] || (hours === +tFrom[0] && minute >= +tFrom[1])) &&
+				(hours < +tTo[0] || (hours === +tTo[0] && minute < +tTo[1]))) {
+				// console.log('open', open);
+				state = state !== 'pause' ? 'open': 'pause';
+			} 
+		}
+	});
+
+	return state;
 }
 
 
