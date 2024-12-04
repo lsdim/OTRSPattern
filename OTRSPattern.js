@@ -139,7 +139,7 @@ async function modTicket(columns) {
 		checkWaitingList(rows);
 		checkBlockList(rows, ticketNumId, stateId);	
 		addWorkTime(rows, customerNameId)	
-		addTitle(rows, ticketNumId);
+		addTitle(rows, ticketNumId, titleId);
     }
 	
 
@@ -491,13 +491,23 @@ async function getChatBot(){
 }
 
 
-async function addTitle(rows, ticketNumId){
+async function addTitle(rows, ticketNumId, titleId) {
 	for (let i = 0; i < rows.length; i++) {
-            const ticketURL = getTicketURL(rows[i], ticketNumId);
-            const ticketText = await getTicketText(ticketURL); // Асинхронний виклик
+		const ticketTitle = getInnerText(rows[i], titleId);
+		const ticketNum = getTitleText(rows[i], ticketNumId);
+
+		if (ticketTitle !== ticketNum) {
+			// console.log('return');
+			return;
+		}
+
+		// console.log(ticketTitle + ' = ' + ticketNum);
+
+        const ticketURL = getTicketURL(rows[i], ticketNumId);
+        const ticketText = await getTicketText(ticketURL); // Асинхронний виклик
 				
-			setTitleText(rows[i], ticketNumId, ticketText);
-        }
+		setTitleText(rows[i], ticketNumId, ticketText);
+    }
 }
 
 async function addWorkTime(rows, customerId){
