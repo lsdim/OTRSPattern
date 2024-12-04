@@ -547,11 +547,8 @@ async function addWorkTime(rows, customerId){
 			}
 			
 		}
-            // const ticketURL = getTicketURL(rows[i], ticketNumId);
-            // const ticketText = await getTicketText(ticketURL); // Асинхронний виклик
-				
-			// setTitleText(rows[i], ticketNumId, ticketText);
-        }
+
+    }
 }
 
 function setTitleByWorkTime(row, id, openHours) {
@@ -577,7 +574,12 @@ function setTitleByWorkTime(row, id, openHours) {
 
 	});
 
-	let scheduleWork = '';
+	const state = getOpenStatusNow(row, id, openHours)
+
+	const innerHTML = getInnerHTML(row, id);
+	setInnerHTML(row, id, state.icon + innerHTML)
+
+	let scheduleWork = `Зараз - ${state.text} \n`;
 	for (let i = 1; i < 8; i++) {
 		if (schedule[i.toString()]) {
 			let openTime = '';
@@ -595,6 +597,25 @@ function setTitleByWorkTime(row, id, openHours) {
 
 }
 
+function getOpenStatusNow(row, id, openHours) {
+	const state = isOpen(openHours);
+	let status = {};
+
+	switch (state) {
+		case 'open': status.text = 'Відчинено';
+			status.icon = '<i class="fa fa-check"></i>';
+				break;
+		case 'pause': status.text = 'Обідня перерва';
+			status.icon = '<i class="fa fa-pause"></i>';
+				break;
+		case 'close': status.text = 'Зачинено';
+			status.icon = '<i class="fa fa-close"></i>';
+				break;
+	};
+
+	return status;
+}
+
 function setColorByWorkTime(row, id, openHours) {
 	const state = isOpen(openHours);
 	let color = 'black';
@@ -602,7 +623,7 @@ function setColorByWorkTime(row, id, openHours) {
 	switch (state) {
 		case 'open': color = 'green';
 				break;
-		case 'pause': color = 'yellow';
+		case 'pause': color = '#ffc107';
 				break;
 		case 'close': color = 'red';
 				break;
@@ -1086,6 +1107,17 @@ function getTitleText(row, id) {
 function setTitleText(row, id, titleText) {
 	if (row.children[id].children.length>0) {
 		row.children[id].children[0].title = titleText;
+	}
+	
+}
+
+function getInnerHTML(row, id) {
+	return row.children[id].children[0].innerHTML;
+}
+
+function setInnerHTML(row, id, innerHTML) {
+	if (row.children[id].children.length>0) {
+		row.children[id].children[0].innerHTML = innerHTML;
 	}
 	
 }
