@@ -503,6 +503,15 @@ async function addTitle(rows, ticketNumId){
 async function addWorkTime(rows, customerId){
 	for (let i = 0; i < rows.length; i++) {
 		const customerName = getInnerText(rows[i], customerId);
+		const customerTitle = getTitleText(rows[i], customerId);
+
+		if (customerName !== customerTitle) {
+			// console.log('return');
+			return;
+		}
+		// console.log(customerName + ' = ' + customerTitle);
+
+
 		const customerIndex = customerName.split(' ')[0].trim();
 		if (customerIndex.length == 5 && !isNaN(customerIndex)) {
 			
@@ -523,23 +532,6 @@ async function addWorkTime(rows, customerId){
 					setTitleByWorkTime(rows[i], customerId, openHours);
 				}
 
-				// const article = getArticleID(htmlID);
-				// const articleURL = article.url;
-				
-				// //console.log('article', article);
-
-				// if (!articleURL) {
-				// 	throw new Error('Article URL not found');
-				// }
-
-				// //console.log(`${url}#${articleURL}`);
-				// const response2 = await fetch(`http://help.ukrposhta.loc${articleURL}`);
-				// if (!response2.ok) {
-				// 	throw new Error('Network response was not ok for the second fetch');
-				// }
-
-				// const html2 = await response2.text();		
-				// return getArticleText(html2, article.id);
 			} catch (error) {
 				console.error('Problem:', error);
 			}
@@ -553,26 +545,43 @@ async function addWorkTime(rows, customerId){
 }
 
 function setTitleByWorkTime(row, id, openHours) {
-	const titleText = '';
-
 	const schedule = {};
-	const scheduleWork = [];
+
+	openHours.forEach(open => {
+		schedule[open.DAYOFWEEK_NUM] = { }
+	});
 
 	openHours.forEach(open => {
 
 		if (open.INTERVALTYPE === 'W') {
-			schedule[open.DAYOFWEEK_EN] = { ... { 'day': open.DAYOFWEEK_UA, 'tFrom': open.TFROM, 'tTo': open.TTO } }
+			schedule[open.DAYOFWEEK_NUM].day = open.DAYOFWEEK_UA;
+			schedule[open.DAYOFWEEK_NUM].tFrom = open.TFROM;
+			schedule[open.DAYOFWEEK_NUM].tTo = open.TTO;
 		}
 
 		if (open.INTERVALTYPE === 'D') {
-			schedule[open.DAYOFWEEK_EN] = {... {'pause': true, 'pauseFrom': open.TFROM, 'pauseTo': open.TTO} }
-		}
+			schedule[open.DAYOFWEEK_NUM].pause = true;
+			schedule[open.DAYOFWEEK_NUM].pauseFrom = open.TFROM;
+			schedule[open.DAYOFWEEK_NUM].pauseTo = open.TTO;
+		}	
 
 	});
 
-	console.log('schedule', schedule);
+	let scheduleWork = '';
+	for (let i = 1; i < 8; i++) {
+		if (schedule[i.toString()]) {
+			let openTime = '';
+			let pauseTime = '';
+			if (schedule[i.toString()].pause) {
+				pauseTime = ` перерва з ${schedule[i.toString()].pauseFrom} по ${schedule[i.toString()].pauseTo}`
+			}
+			openTime = `(з ${schedule[i.toString()].tFrom} по ${schedule[i.toString()].tTo}${pauseTime})`;
 
-	setTitleText(row, id, titleText)
+			scheduleWork = scheduleWork + `${schedule[i.toString()].day} ${openTime} \n`;
+		}
+	}
+
+	setTitleText(row, id, scheduleWork)
 
 }
 
@@ -1058,6 +1067,10 @@ function isTicketZoom() {
 
 function getInnerText(row, id) {
 	return row.children[id].innerText
+}
+
+function getTitleText(row, id) {
+	return row.children[id].children[0].title;
 }
 
 function setTitleText(row, id, titleText) {
