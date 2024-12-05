@@ -150,6 +150,28 @@ if (isTicketZoom()) {
 		if (ticketClose) {
 			ticketClose.addEventListener("click", saveTicketText);
 		}
+
+	setIndexTitleOpenHouhs();
+			
+}
+
+async function setIndexTitleOpenHouhs() {
+
+	const indexElement = document.querySelectorAll('p.FixedValueSmall')[1];
+	const customerIndex = indexElement.innerText;
+	if (customerIndex.length == 5 && !isNaN(customerIndex)) {
+		const openHours = await getOpenHours(customerIndex);
+
+		if (openHours) {
+
+			const state = getOpenStatusNow(openHours);
+			const scheduleWork = getScheduleWork(openHours);
+
+			indexElement.innerHTML = state.icon + indexElement.innerHTML;
+			indexElement.title = scheduleWork
+
+		}
+	}	
 }
 
 async function saveTicketText() {
@@ -524,34 +546,51 @@ async function addWorkTime(rows, customerId){
 
 		const customerIndex = customerName.split(' ')[0].trim();
 		if (customerIndex.length == 5 && !isNaN(customerIndex)) {
-			
 
-			const url = `https://index.ukrposhta.ua/endpoints-for-apps/index.php?method=get_postoffices_openhours_by_postindex&pc=${customerIndex}`;
+			const openHours = await getOpenHours(customerIndex);
 
-			try {
-				const workTime = await fetch(url);
-				if (!workTime.ok) {
-					throw new Error('Network response workTime was not ok');
-				}			
-
-				const jsonRez = await workTime.json();				
-
-				if (jsonRez.Entry) {
-					const openHours = jsonRez.Entry;
-					setColorByWorkTime(rows[i], customerId, openHours);
-					setTitleByWorkTime(rows[i], customerId, openHours);
-				}
-
-			} catch (error) {
-				console.error('Problem:', error);
-			}
+			if (openHours) {
+				setColorByWorkTime(rows[i], customerId, openHours);
+				setTitleByWorkTime(rows[i], customerId, openHours);
+			}					
 			
 		}
 
     }
 }
 
+async function getOpenHours(customerIndex) {
+
+	const url = `https://index.ukrposhta.ua/endpoints-for-apps/index.php?method=get_postoffices_openhours_by_postindex&pc=${customerIndex}`;
+
+		try {
+			const workTime = await fetch(url);
+			if (!workTime.ok) {
+				throw new Error('Network response workTime was not ok');
+			}			
+
+			const jsonRez = await workTime.json();				
+
+			if (jsonRez.Entry) {
+				const openHours = jsonRez.Entry;
+				return openHours;
+			}			
+
+		} catch (error) {
+			console.error('Problem:', error);
+		}	
+}
+
 function setTitleByWorkTime(row, id, openHours) {
+	
+	const state = getOpenStatusNow(openHours);
+	const innerHTML = getInnerHTML(row, id);
+	setInnerHTML(row, id, state.icon + innerHTML);
+	setTitleText(row, id, getScheduleWork(openHours));
+
+}
+
+function getScheduleWork(openHours) {
 	const schedule = {};
 
 	openHours.forEach(open => {
@@ -574,10 +613,7 @@ function setTitleByWorkTime(row, id, openHours) {
 
 	});
 
-	const state = getOpenStatusNow(row, id, openHours)
-
-	const innerHTML = getInnerHTML(row, id);
-	setInnerHTML(row, id, state.icon + innerHTML)
+	const state = getOpenStatusNow(openHours)
 
 	let scheduleWork = `Зараз - ${state.text} \n`;
 	for (let i = 1; i < 8; i++) {
@@ -593,11 +629,10 @@ function setTitleByWorkTime(row, id, openHours) {
 		}
 	}
 
-	setTitleText(row, id, scheduleWork)
-
+	return scheduleWork;
 }
 
-function getOpenStatusNow(row, id, openHours) {
+function getOpenStatusNow(openHours) {
 	const state = isOpen(openHours);
 	let status = {};
 
@@ -1107,8 +1142,7 @@ function getTitleText(row, id) {
 function setTitleText(row, id, titleText) {
 	if (row.children[id].children.length>0) {
 		row.children[id].children[0].title = titleText;
-	}
-	
+	}	
 }
 
 function getInnerHTML(row, id) {
