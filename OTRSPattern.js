@@ -22,6 +22,16 @@ let columns = getColumns();
 const intervalID = setInterval(modTicket, 30000, columns);
 modTicket(columns);
 
+
+if (isTicketZoom()) { 
+	const ticketClose = document.querySelector('#nav-Close a');
+		if (ticketClose) {
+			ticketClose.addEventListener("click", saveTicketText);
+		}
+
+	setIndexTitleOpenHours();			
+}
+
 async function delay(time) {
 	
 	const tmp = document.getElementsByClassName('Loading');
@@ -145,17 +155,7 @@ async function modTicket(columns) {
 
 }
 
-if (isTicketZoom()) { 
-	const ticketClose = document.querySelector('#nav-Close a'); //.getElementById('nav-Close');
-		if (ticketClose) {
-			ticketClose.addEventListener("click", saveTicketText);
-		}
-
-	setIndexTitleOpenHouhs();
-			
-}
-
-async function setIndexTitleOpenHouhs() {
+async function setIndexTitleOpenHours() {
 
 	const indexElement = document.querySelectorAll('p.FixedValueSmall')[1];
 	const customerIndex = indexElement.innerText;
@@ -169,6 +169,7 @@ async function setIndexTitleOpenHouhs() {
 
 			indexElement.innerHTML = state.icon + indexElement.innerHTML;
 			indexElement.title = scheduleWork
+			indexElement.style.color = state.color;
 
 		}
 	}	
@@ -549,8 +550,7 @@ async function addWorkTime(rows, customerId){
 
 			const openHours = await getOpenHours(customerIndex);
 
-			if (openHours) {
-				setColorByWorkTime(rows[i], customerId, openHours);
+			if (openHours) {				
 				setTitleByWorkTime(rows[i], customerId, openHours);
 			}					
 			
@@ -587,6 +587,7 @@ function setTitleByWorkTime(row, id, openHours) {
 	const innerHTML = getInnerHTML(row, id);
 	setInnerHTML(row, id, state.icon + innerHTML);
 	setTitleText(row, id, getScheduleWork(openHours));
+	setColorByWorkTime(row, id, state.color);
 
 }
 
@@ -639,31 +640,22 @@ function getOpenStatusNow(openHours) {
 	switch (state) {
 		case 'open': status.text = 'Відчинено';
 			status.icon = '<i class="fa fa-check"></i>';
+			status.color = 'green';
 				break;
 		case 'pause': status.text = 'Обідня перерва';
 			status.icon = '<i class="fa fa-pause"></i>';
+			status.color = '#ffc107';
 				break;
 		case 'close': status.text = 'Зачинено';
 			status.icon = '<i class="fa fa-close"></i>';
+			status.color = 'red';
 				break;
 	};
 
 	return status;
 }
 
-function setColorByWorkTime(row, id, openHours) {
-	const state = isOpen(openHours);
-	let color = 'black';
-
-	switch (state) {
-		case 'open': color = 'green';
-				break;
-		case 'pause': color = '#ffc107';
-				break;
-		case 'close': color = 'red';
-				break;
-	};
-
+function setColorByWorkTime(row, id, color) {
 	row.children[id].style.color = color;
 }
 
