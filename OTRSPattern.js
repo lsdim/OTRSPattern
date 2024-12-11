@@ -516,15 +516,16 @@ async function getChatBot(){
 
 async function addTitle(rows, ticketNumId, titleId) {
 	for (let i = 0; i < rows.length; i++) {
-		const ticketTitle = getInnerText(rows[i], titleId);
+		let ticketTitle = getInnerText(rows[i], titleId);
 		const ticketNum = getTitleText(rows[i], ticketNumId);
 
-		if (ticketTitle !== ticketNum) {
-			// console.log('return');
-			return;
+		if (isTicketLocked()) {
+			ticketTitle = ticketTitle.split('\n')[1];
 		}
 
-		// console.log(ticketTitle + ' = ' + ticketNum);
+		if (ticketTitle !== ticketNum) {
+			return;
+		}
 
         const ticketURL = getTicketURL(rows[i], ticketNumId);
         const ticketText = await getTicketText(ticketURL); // Асинхронний виклик
@@ -1093,7 +1094,12 @@ function getColumns() {
 		return [];
 	}
 	let columns = [];
-	const headers = document.getElementsByClassName("DashboardHeader");
+	const className = isTicketLocked() ? 'OverviewHeader' : 'DashboardHeader';
+	if (isTicketLocked()) {
+		columns.push('rezerv');
+	}
+	
+	const headers = document.getElementsByClassName(className);
 
 	for (let i=0; i<headers.length; i++) {
 		columns.push(headers[i].children[0].title.split(',')[0]);	
@@ -1105,11 +1111,19 @@ function getColumns() {
 
 function isDashboard() {
 	if (window.location.href != 'http://help.ukrposhta.loc/otrs/index.pl?Action=AgentDashboard' &&
-		window.location.href != 'http://help.ukrposhta.loc/otrs/index.pl?') {
+		window.location.href != 'http://help.ukrposhta.loc/otrs/index.pl?' &&
+		window.location.href !='http://help.ukrposhta.loc/otrs/index.pl?Action=AgentTicketLockedView') {
 		console.log('Not Dashboard', window.location.href);
 		return false;
 	}
 	
+	return true;
+}
+
+function isTicketLocked() {
+	if (window.location.href !='http://help.ukrposhta.loc/otrs/index.pl?Action=AgentTicketLockedView') {
+		return false;
+	}	
 	return true;
 }
 
