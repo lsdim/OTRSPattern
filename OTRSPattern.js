@@ -147,7 +147,7 @@ async function modTicket(columns) {
 
     if (rows.length > 0) {		
 		checkWaitingList(rows);
-		checkBlockList(rows, ticketNumId, stateId);	
+		checkBlockList(rows, ticketNumId, stateId, customerNameId, titleId, createdId, ageId);	
 		addWorkTime(rows, customerNameId)	
 		addTitle(rows, ticketNumId, titleId);
     }
@@ -725,7 +725,7 @@ async function checkWaitingList(rows){
 		}
 }
 
-async function checkBlockList(rows, ticketNumId, stateId){
+async function checkBlockList(rows, ticketNumId, stateId, customerNameId, titleId, createdId, ageId){
 	
 	let ticketsBlock = [];	
 	
@@ -747,13 +747,17 @@ async function checkBlockList(rows, ticketNumId, stateId){
 						if (block) {							
 							ticketsBlock.splice(ticketsBlock.indexOf(ticketNum),1);
 							await updTiketBlock(rows[i], '#fec33e', 'white', ticketsBlock);
+							sendBlockMessage('Заблоковано заявку', rows[i], ticketNumId, customerNameId, titleId, createdId, ageId);
+							
 						} else {
 							ticketsBlock.splice(ticketsBlock.indexOf(ticketNum),1);
 							await updTiketBlock(rows[i], 'rgb(236, 144, 115)', 'white', ticketsBlock);
+							sendBlockMessage('Не вдалось заблокувати заявку', rows[i], ticketNumId, customerNameId, titleId, createdId, ageId);
 						}
 					} else {
 						ticketsBlock.splice(ticketsBlock.indexOf(ticketNum),1);
 						await updTiketBlock(rows[i], 'rgb(236, 144, 115)', 'white', ticketsBlock);
+						sendBlockMessage(`Не заблоковано \n Заявка не в статусі 'Призначена'`, rows[i], ticketNumId, customerNameId, titleId, createdId, ageId);
 					}					
 				}
 				
@@ -761,11 +765,22 @@ async function checkBlockList(rows, ticketNumId, stateId){
 		}
 }
 
+function sendBlockMessage(text, row, ticketNumId, customerNameId, titleId, createdId, ageId) {
+	if (chatBot.isActive) {
+		const messageText = `🚨${text} <b>${getInnerText(row, ticketNumId)}</b>🚨\n\n` 
+			+`${columns[customerNameId]} \n<b> ${getInnerText(row, customerNameId)} </b>\n\n`
+			+`${columns[titleId]} \n<b> ${getInnerText(row,titleId)} </b>\n\n`
+			+`${columns[createdId]} \n<b> ${getInnerText(row,createdId)}  (${getInnerText(row,ageId)}) </b>`
+								
+		sendMessage(BOT_TOKEN, chatBot.chatId, messageText);
+	}
+}
+
 async function blockTicket(url) {
 	try {
         const responseID = await fetch(url);
         if (!responseID.ok) {
-            throw new Error('Network response was not ok for the first fetch');
+            throw new Error(`Error fetch: ${url}`);
 			return false;
         }
 
@@ -779,15 +794,12 @@ async function blockTicket(url) {
         }
 //*********************Comment if TEST */
         const response2 = await fetch(blockURL);
-        if (!response2.ok) {
-			throw new Error('Network response was not ok for the second fetch');
+		if (!response2.ok) {
 			if (chatBot.isActive) {
 				sendMessage(BOT_TOKEN, chatBot.chatId, 'Я, чесно, намагався заблокувати заявку, але... ');
 			}
-		} else {
-			if (chatBot.isActive) {
-				sendMessage(BOT_TOKEN, chatBot.chatId, 'Заблоковано заявку із списку');
-			}
+			throw new Error('Network response was not ok for the second fetch');
+			
 		}
 		
 		console.log('block', blockURL);
