@@ -126,33 +126,34 @@ async function modTicket(columns) {
 
     const rows = document.getElementsByClassName("MasterAction");
 
-    const ticketNumId = columns.findIndex(el => el === 'TicketNumber');
-    const createdId = columns.findIndex(el => el === 'Створено');
-    const ageId = columns.findIndex(el => el === 'Відкрита');
-    const titleId = columns.findIndex(el => el === 'Заголовок');
-    const stateId = columns.findIndex(el => el === 'Стан');
-    const ownerId = columns.findIndex(el => el === 'Власник');
-    const customerNameId = columns.findIndex(el => el === "Ім'я клієнта");
-    const ticketTagId = columns.findIndex(el => el === 'Тег заявки');
-    const queueId = columns.findIndex(el => el === 'Черга');
-	
-		document.querySelectorAll('.Pagination a').forEach(link => {
+	const idList = {};
+
+	idList.ticketNumId = columns.findIndex(el => el === 'TicketNumber');
+    idList.createdId = columns.findIndex(el => el === 'Створено');
+    idList.ageId = columns.findIndex(el => el === 'Відкрита');
+    idList.titleId = columns.findIndex(el => el === 'Заголовок');
+    idList.stateId = columns.findIndex(el => el === 'Стан');
+    idList.ownerId = columns.findIndex(el => el === 'Власник');
+    idList.customerNameId = columns.findIndex(el => el === "Ім'я клієнта");
+    idList.ticketTagId = columns.findIndex(el => el === 'Тег заявки');
+    idList.queueId = columns.findIndex(el => el === 'Черга');
+
+	document.querySelectorAll('.Pagination a').forEach(link => {
 			//console.log('link',link);
-			link.addEventListener('click', function () {
-				modTicket(columns);			
-			});
+		link.addEventListener('click', function () {
+			modTicket(columns);			
 		});
+	});
 	
 	getChatBot();
 
     if (rows.length > 0) {		
 		checkWaitingList(rows);
-		checkBlockList(rows, ticketNumId, stateId, customerNameId, titleId, createdId, ageId);	
-		addWorkTime(rows, customerNameId)	
-		addTitle(rows, ticketNumId, titleId);
-    }
+		checkBlockList(rows, idList);	
+		addWorkTime(rows, idList.customerNameId);	
+		addTitle(rows, idList);
+	}
 	
-
 }
 
 async function setIndexTitleOpenHours() {
@@ -501,7 +502,7 @@ async function checkNewTicket(columns) {
 }
 
 
-
+//************************************************************************************
 
 
 
@@ -514,10 +515,10 @@ async function getChatBot(){
 }
 
 
-async function addTitle(rows, ticketNumId, titleId) {
+async function addTitle(rows, idList) {
 	for (let i = 0; i < rows.length; i++) {
-		let ticketTitle = getInnerText(rows[i], titleId);
-		const ticketNum = getTitleText(rows[i], ticketNumId);
+		let ticketTitle = getInnerText(rows[i], idList.titleId);
+		const ticketNum = getTitleText(rows[i], idList.ticketNumId);
 
 		if (isTicketLocked()) {
 			ticketTitle = ticketTitle.split('\n')[1];
@@ -527,10 +528,10 @@ async function addTitle(rows, ticketNumId, titleId) {
 			return;
 		}
 
-        const ticketURL = getTicketURL(rows[i], ticketNumId);
+        const ticketURL = getTicketURL(rows[i], idList.ticketNumId);
         const ticketText = await getTicketText(ticketURL); // Асинхронний виклик
 				
-		setTitleText(rows[i], ticketNumId, ticketText);
+		setTitleText(rows[i], idList.ticketNumId, ticketText);
     }
 }
 
@@ -725,7 +726,7 @@ async function checkWaitingList(rows){
 		}
 }
 
-async function checkBlockList(rows, ticketNumId, stateId, customerNameId, titleId, createdId, ageId){
+async function checkBlockList(rows, idList){
 	
 	let ticketsBlock = [];	
 	
@@ -736,28 +737,28 @@ async function checkBlockList(rows, ticketNumId, stateId, customerNameId, titleI
 	if (ticketsBlock.length>0) {
 			for (let i = 0; i < rows.length; i++) {			
 				
-				const ticketNum = getInnerText(rows[i],ticketNumId);
-				const ticketState = getInnerText(rows[i], stateId);
+				const ticketNum = getInnerText(rows[i],idList.ticketNumId);
+				const ticketState = getInnerText(rows[i], idList.stateId);
 						
 				if (ticketsBlock.includes(ticketNum)) {		
 
 					if (ticketState === 'Призначена') {
-						const ticketURL = getTicketURL(rows[i], ticketNumId);;
+						const ticketURL = getTicketURL(rows[i], idList.ticketNumId);;
 						const block = await blockTicket(ticketURL);
 						if (block) {							
 							ticketsBlock.splice(ticketsBlock.indexOf(ticketNum),1);
 							await updTiketBlock(rows[i], '#fec33e', 'white', ticketsBlock);
-							sendBlockMessage('Заблоковано заявку', rows[i], ticketNumId, customerNameId, titleId, createdId, ageId);
+							sendBlockMessage('Заблоковано заявку', rows[i], idList);
 							
 						} else {
 							ticketsBlock.splice(ticketsBlock.indexOf(ticketNum),1);
 							await updTiketBlock(rows[i], 'rgb(236, 144, 115)', 'white', ticketsBlock);
-							sendBlockMessage('Не вдалось заблокувати заявку', rows[i], ticketNumId, customerNameId, titleId, createdId, ageId);
+							sendBlockMessage('Не вдалось заблокувати заявку', rows[i], idList);
 						}
 					} else {
 						ticketsBlock.splice(ticketsBlock.indexOf(ticketNum),1);
 						await updTiketBlock(rows[i], 'rgb(236, 144, 115)', 'white', ticketsBlock);
-						sendBlockMessage(`Не заблоковано \n Заявка не в статусі 'Призначена'`, rows[i], ticketNumId, customerNameId, titleId, createdId, ageId);
+						sendBlockMessage(`Не заблоковано \n Заявка не в статусі 'Призначена'`, rows[i], idList);
 					}					
 				}
 				
@@ -765,12 +766,12 @@ async function checkBlockList(rows, ticketNumId, stateId, customerNameId, titleI
 		}
 }
 
-function sendBlockMessage(text, row, ticketNumId, customerNameId, titleId, createdId, ageId) {
+function sendBlockMessage(text, row, idList) {
 	if (chatBot.isActive) {
-		const messageText = `🚨${text} <b>${getInnerText(row, ticketNumId)}</b>🚨\n\n` 
-			+`${columns[customerNameId]} \n<b> ${getInnerText(row, customerNameId)} </b>\n\n`
-			+`${columns[titleId]} \n<b> ${getInnerText(row,titleId)} </b>\n\n`
-			+`${columns[createdId]} \n<b> ${getInnerText(row,createdId)}  (${getInnerText(row,ageId)}) </b>`
+		const messageText = `🚨${text} <b>${getInnerText(row, idList.ticketNumId)}</b>🚨\n\n` 
+			+`${columns[idList.customerNameId]} \n<b> ${getInnerText(row, idList.customerNameId)} </b>\n\n`
+			+`${columns[idList.titleId]} \n<b> ${getInnerText(row,idList.titleId)} </b>\n\n`
+			+`${columns[idList.createdId]} \n<b> ${getInnerText(row,idList.createdId)}  (${getInnerText(row,idList.ageId)}) </b>`
 								
 		sendMessage(BOT_TOKEN, chatBot.chatId, messageText);
 	}
