@@ -168,7 +168,11 @@ async function setIndexTitleOpenHours() {
 			const state = getOpenStatusNow(openHours);
 			const scheduleWork = getScheduleWork(openHours);
 
-			indexElement.innerHTML = state.icon + indexElement.innerHTML;
+			const url = `http://help.ukrposhta.loc/otrs/index.pl?`
+				+`Action=AgentTicketSearch&Subaction=Search&EmptySearch=1&ShownAttributes=LabelTicketNumber%3BLabelFrom&`
+				+`Profile=&Name=&TicketNumber=&From=${ customerIndex }&Attribute=Fulltext&ResultForm=Normal`;
+
+			indexElement.innerHTML = `<a href="${url}">`+ state.icon + indexElement.innerHTML + '</a>';
 			indexElement.title = scheduleWork
 			indexElement.style.color = state.color;
 
