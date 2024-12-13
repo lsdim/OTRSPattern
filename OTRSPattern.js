@@ -148,7 +148,7 @@ async function modTicket(columns) {
 	getChatBot();
 
     if (rows.length > 0) {		
-		checkWaitingList(rows);
+		checkWaitingList(rows, idList);
 		checkBlockList(rows, idList);	
 		addWorkTime(rows, idList.customerNameId);	
 		addTitle(rows, idList);
@@ -694,7 +694,7 @@ function isOpen(openHours) {
 }
 
 
-async function checkWaitingList(rows){
+async function checkWaitingList(rows, idList){
 	
 	let waitingList = [];
 	
@@ -713,17 +713,32 @@ async function checkWaitingList(rows){
 						rows[i].querySelectorAll('td').forEach(td => {
 							td.style.backgroundColor = '#28a745';
 							td.style.color = 'white';
-						});
-						
-						if (chatBot.isActive) {
-							sendMessage(BOT_TOKEN, chatBot.chatId, 'Є заявка, яка відповідає умові очікуванні: \t\n'
-							+ `${wait.col} - ${wait.data}`);
-						}
-						
+						});						
+
+						const ticketNum = getInnerText(rows[i], idList.ticketNumId);
+
+						if (!wait[ticketNum]) {
+							sendWaitingMessage(`${wait.col} - ${wait.data}`, rows[i], idList);
+							wait[ticketNum] = true;
+						}						
 					}
 				})				
-			}
 		}
+		await setData('waitingList', waitingList);
+		}
+}
+
+function sendWaitingMessage(text, row, idList) {
+	if (chatBot.isActive) {
+		const messageText = `Є заявка, яка відповідає умові очікуванні: \t\n`
+			+`🚨${text}🚨 \n\n` 
+			+`<b>${getInnerText(row, idList.ticketNumId)}</b>\n\n` 
+			+`${columns[idList.customerNameId]} \n<b> ${getInnerText(row, idList.customerNameId)} </b>\n\n`
+			+`${columns[idList.titleId]} \n<b> ${getInnerText(row,idList.titleId)} </b>\n\n`
+			+`${columns[idList.createdId]} \n<b> ${getInnerText(row,idList.createdId)}  (${getInnerText(row,idList.ageId)}) </b>`
+								
+		sendMessage(BOT_TOKEN, chatBot.chatId, messageText);
+	}
 }
 
 async function checkBlockList(rows, idList){
