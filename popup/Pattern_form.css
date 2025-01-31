@@ -8,7 +8,7 @@
 .form {
   position: relative;
   z-index: 1;
-  background: #FFFFFF;
+  background: #ffffff;
   max-width: 560px;
   margin: 0 auto 80px;
   padding: 25px;
@@ -44,8 +44,8 @@
 
 /* Стиль для активного стану чекбокса */
 .form input[type="checkbox"]:checked {
-  background: #4CAF50;
-  border-color: #4CAF50;
+  background: #4caf50;
+  border-color: #4caf50;
 }
 
 /* Додаємо галочку при активному стані */
@@ -59,7 +59,6 @@
   transform: rotate(45deg);
   margin: -9px -3px;
 }
-
 
 .form select {
   font-family: "Roboto", sans-serif;
@@ -88,22 +87,24 @@
   font-family: "Roboto", sans-serif;
   text-transform: uppercase;
   outline: 0;
-  background: #4CAF50;
+  background: #4caf50;
   width: 100%;
   border: 0;
   padding: 15px;
-  color: #FFFFFF;
+  color: #ffffff;
   font-size: 14px;
   -webkit-transition: all 0.3 ease;
   transition: all 0.3 ease;
   cursor: pointer;
   margin-bottom: 5px;
 }
-.form button:hover,.form button:active,.form button:focus {
-  background: #43A047;
+.form button:hover,
+.form button:active,
+.form button:focus {
+  background: #43a047;
 }
 
-.form button:active{
+.form button:active {
   background: #b5e7a0;
   transform: scale(1.05);
   border-radius: 10px;
@@ -117,7 +118,7 @@
   text-align: start;
 }
 .form .message a {
-  color: #4CAF50;
+  color: #4caf50;
   text-decoration: none;
 }
 .form .register-form {
@@ -129,7 +130,8 @@
   max-width: 300px;
   margin: 0 auto;
 }
-.container:before, .container:after {
+.container:before,
+.container:after {
   content: "";
   display: block;
   clear: both;
@@ -154,71 +156,81 @@
   text-decoration: none;
 }
 .container .info span .fa {
-  color: #EF3B3A;
+  color: #ef3b3a;
 }
 
-table, td {
+table,
+td {
   border: 1px solid #ddd;
   border-collapse: collapse;
   font-family: "Roboto", sans-serif;
   background: #f2f2f2;
   width: 100%;
-  margin:  2px 0 0 0;
-  padding: 0 8px;  
+  margin: 2px 0 0 0;
+  padding: 0 8px;
   font-size: 14px;
 }
 
 button[name="remove"] {
-	margin: 2px 0;
-	padding: 10px;
-	background: #dc3545;
+  margin: 2px 0;
+  padding: 10px;
+  background: #dc3545;
 }
 
-button[name="remove"]:hover, button[name="remove"]:active, button[name="remove"]:focus {
-	background: #e83e8c;
+button[name="remove"]:hover,
+button[name="remove"]:active,
+button[name="remove"]:focus {
+  background: #e83e8c;
+}
+
+.button-container {
+  display: flex;
 }
 
 /* Загальний стиль для меню */
 .menu {
-    display: flex; /* Розташування елементів горизонтально */
-    justify-content: center; /* Вирівнювання посилань по центру */
-    background-color: #333; /* Тло меню */
-    padding: 2px 0; /* Відступи зверху та знизу */
-	max-width: 610px;
-	/*width: 500px*/
-	margin: 0 auto 0px;
+  display: flex; /* Розташування елементів горизонтально */
+  justify-content: center; /* Вирівнювання посилань по центру */
+  background-color: #333; /* Тло меню */
+  padding: 2px 0; /* Відступи зверху та знизу */
+  max-width: 610px;
+  /*width: 500px*/
+  margin: 0 auto 0px;
 }
 
 /* Стиль для посилань */
 .menu a {
-    text-decoration: none; /* Забираємо підкреслення */
-    color: white; /* Колір тексту */
-    padding: 5px 10px; /* Відступи всередині кнопок */
-    font-size: 16px; /* Розмір тексту */
-    font-weight: bold; /* Жирний текст */
-    /*border-radius: 5px; /* Згладжені кути */
-    transition: background-color 0.3s, color 0.3s; /* Плавний перехід кольорів */
+  text-decoration: none; /* Забираємо підкреслення */
+  color: white; /* Колір тексту */
+  padding: 5px 10px; /* Відступи всередині кнопок */
+  font-size: 16px; /* Розмір тексту */
+  font-weight: bold; /* Жирний текст */
+  /*border-radius: 5px; /* Згладжені кути */
+  transition: background-color 0.3s, color 0.3s; /* Плавний перехід кольорів */
 }
 
 /* Стиль при наведенні */
 .menu a:hover {
-    background-color: #575757; /* Зміна кольору тла при наведенні */
-    color: #FFD700; /* Золотистий текст при наведенні */
+  background-color: #575757; /* Зміна кольору тла при наведенні */
+  color: #ffd700; /* Золотистий текст при наведенні */
 }
 
 /* Стиль для активного посилання */
 .menu a.active {
-    background-color: #FFD700; /* Золотистий фон для активного */
-    color: #333; /* Темний текст */
+  background-color: #ffd700; /* Золотистий фон для активного */
+  color: #333; /* Темний текст */
 }
 
-
 body {
-  background: #eaece5 /*#76b852; *//* fallback for old browsers */
+  background: #eaece5; /*#76b852; */ /* fallback for old browsers */
   background: rgb(234, 236, 229);
-  background: linear-gradient(90deg, rgba(234, 236, 229,1) 0%, rgba(178, 194, 191,1) 50%);
+  background: linear-gradient(
+    90deg,
+    rgba(234, 236, 229, 1) 0%,
+    rgba(178, 194, 191, 1) 50%
+  );
   /*linear-gradient(90deg, rgba(141,194,111,1) 0%, rgba(118,184,82,1) 50%);*/
   font-family: "Roboto", sans-serif;
   -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;      
+  -moz-osx-font-smoothing: grayscale;
 }

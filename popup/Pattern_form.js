@@ -1,8 +1,8 @@
 ﻿
 document.querySelectorAll('.menu a').forEach(link => {
-    if (link.href === window.location.href) {
-        link.classList.add('active');
-    }
+	if (link.href === window.location.href) {
+		link.classList.add('active');
+	}
 });
 
 
@@ -14,6 +14,11 @@ const loginForm = document.getElementById('loginForm');
 const patternTag = document.getElementById("patternTag");
 const patternName = document.getElementById("patternName");
 const patternText = document.getElementById("patternText");
+
+const loadButton = document.getElementById('loadToServer');
+const problemButton = document.getElementById('insertProblem');
+
+const isAddProblem = document.getElementById("isAddProblem");
 
 
 
@@ -42,17 +47,17 @@ const patternText = document.getElementById("patternText");
 setValues();
 
 async function setValues() {
-	
+
 	const patterns = await getPatternsFromDB(DBUrl);
 
 	//const patterns = Object.values(newPatterns);
 	//console.log('newPatterns', newPatterns);
-	
-	
+
+
 	fillPattertTag(patterns)
 
 	getPatternsByTag(patterns);
-	
+
 	patternTag.addEventListener("change", (event) => {
 		//console.log('patterns', patterns);
 		getPatternsByTag(patterns, event.target.value);
@@ -62,12 +67,12 @@ async function setValues() {
 		//console.log('patternName', event.target.value);
 		getPatternsTextByName(patterns, event.target.value, patternTag.value);
 	});
-	
+
 	//return patterns;
-}	
+}
 
 function fillPattertTag(patterns) {
-		for (const key in patterns){
+	for (const key in patterns) {
 		let opt = document.createElement('option');
 		//console.log('patterns['+key+']',patterns[key]);
 		opt.value = key;
@@ -91,27 +96,27 @@ function getPatternsTextByName(patterns, id, tag) {
 		patternText.value = patterns[tag].pattern[id].text;
 		//patternText.value = patternText.innerHTML;
 	}
-	
+
 }
 
 function getPatternsByTag(patterns, tag) {
-	
+
 	patternName.innerHTML = null;
-	
+
 	let newPatterns;
 	//console.log('newPatterns1', newPatterns, patterns);
 	//console.log('tag', tag);
-	
+
 	if (tag) {
-		newPatterns = {tag: patterns[tag]}; //.filter((patt) =>(patt.tag === tag));
+		newPatterns = { tag: patterns[tag] }; //.filter((patt) =>(patt.tag === tag));
 	} else {
 		newPatterns = patterns;
 	};
-	
+
 	//console.log('newPatterns2', newPatterns, patterns);
 	let i = 0;
 	let j = 0;
-	for (const key in newPatterns){
+	for (const key in newPatterns) {
 		//console.log('key', key);
 		for (const keyPatt in newPatterns[key].pattern) {
 			//console.log('keyPatt', keyPatt);
@@ -119,92 +124,112 @@ function getPatternsByTag(patterns, tag) {
 			opt.value = keyPatt;
 			opt.innerHTML = newPatterns[key].pattern[keyPatt].name;
 			patternName.appendChild(opt);
-			
-			if (i===0 && j === 0) {
+
+			if (i === 0 && j === 0) {
 				getPatternsTextByName(newPatterns, keyPatt, key);
 			}
-			
+
 			j++;
-		}	
+		}
 		i++;
 	}
 }
 
 
 
-async function getPatternsFromDB(url) {	
-    try {
-        const responseID = await fetch(url);
-        if (!responseID.ok) {
-            throw new Error('Network response was not ok for the first fetch');
-        }
+async function getPatternsFromDB(url) {
+	try {
+		const responseID = await fetch(url);
+		if (!responseID.ok) {
+			throw new Error('Network response was not ok for the first fetch');
+		}
 
-        const json = await responseID.json();
+		const json = await responseID.json();
 		//console.log('json', json);
 		return json;
-        
-    } catch (error) {
-        console.error('There has been a problem with your fetch operation:', error);
-    }
+
+	} catch (error) {
+		console.error('There has been a problem with your fetch operation:', error);
+	}
 }
 
-const loadButton = document.getElementById('loadToServer');
+
 
 loadButton.addEventListener("click", (e) => {
-  //e.preventDefault();
-  
-  if (!patternTag.value) {
-	  alert("Виберіть групу!");
-	  return;
-  }
-  
-  uploadPatterns(patternTag.value, patternText.value);
- 
-  
-  console.log('loadButton');
+	//e.preventDefault();
 
-  // handle submit
+	if (!patternTag.value) {
+		alert("Виберіть групу!");
+		return;
+	}
+
+	uploadPatterns(patternTag.value, patternText.value);
+
+
+	console.log('loadButton');
+
+	// handle submit
 });
 
-async function clickPutText() {
-	
-	const ticketText = await getTicketText();
+let ticketText = '';
 
-	loginForm.addEventListener("submit", (e) => {
-	  e.preventDefault();
-	  
-	  function reportError(error) {
-		  console.error(`Неможливо вставити текст: ${error}`);
-		}
-	  
-	  
-	  browser.tabs.query({active: true, currentWindow: true})
-			.then(sendPutText)
-			.catch(reportError);
-		
-	  function sendPutText(tabs) {
-		 browser.tabs.sendMessage(tabs[0].id, {
-			command: "putText",
-			textMessage: patternText.value,
-			ticketMessage: ticketText
-		});
-	  }	 
-	  
-	  console.log('submit');
-	   window.close();
 
-	  // handle submit
-	});	
+
+
+problemButton.addEventListener("click", clickTicketText);
+
+async function clickTicketText() {
+	ticketText = await getTicketText();
+	runScript('', ticketText);
+	window.close();
 }
 
-browser.tabs.executeScript({file: "/content_script/content_script.js"})
-		.then(clickPutText)
-		.catch(reportExecuteScriptError);
+async function clickPutText() {
+
+	ticketText = await getTicketText();
+
+}
+
+loginForm.addEventListener("submit", (e) => {
+
+	e.preventDefault();
+
+	ticketText = isAddProblem.checked ? ticketText : '';
+
+	runScript(patternText.value, ticketText);
+
+	console.log('submit');
+	window.close();
+});
+
+
+
+function runScript(patternText, ticketText) {
+	function reportError(error) {
+		console.error(`Неможливо вставити текст: ${error}`);
+	}
+
+	browser.tabs.query({ active: true, currentWindow: true })
+		.then(sendPutText)
+		.catch(reportError);
+
+	function sendPutText(tabs) {
+		browser.tabs.sendMessage(tabs[0].id, {
+			command: "putText",
+			textMessage: patternText,
+			ticketMessage: ticketText
+		});
+	}
+}
+
+browser.tabs.executeScript({ file: "/content_script/content_script.js" })
+	.then(clickPutText)
+	.catch(reportExecuteScriptError);
 
 
 
 function reportExecuteScriptError(error) {
-  console.error(`Помилка виконання: ${error.message}`);
+	console.error(`Помилка виконання: ${error.message}`);
 }
 
 
@@ -213,20 +238,20 @@ function showLog(message) {
 }
 
 function uploadPatterns(tag, patternsList) {
-    const url = `https://otrs-patterns-default-rtdb.europe-west1.firebasedatabase.app/patterns/${tag}/pattern.json`;
-	
+	const url = `https://otrs-patterns-default-rtdb.europe-west1.firebasedatabase.app/patterns/${tag}/pattern.json`;
+
 	const patternsArray = patternsList.split('@');
 	patternText.value = `Завантаження шаблонів ${patternsArray.length} шт.`
-	
-	for (let i=0; i<patternsArray.length; i++) {
+
+	for (let i = 0; i < patternsArray.length; i++) {
 		if (patternsArray[i].trim() === '') {
 			console.log('Порожній елемент');
 			showLog('Порожній шаблон');
 			continue;
 		};
-		
+
 		const pattern = patternsArray[i].split('$');
-		
+
 		if (pattern[0].trim() === '' || pattern[1].trim() === '') {
 			showLog("Порожнє ім'я або текст");
 			console.log("Порожнє ім'я або текст", pattern);
@@ -236,39 +261,39 @@ function uploadPatterns(tag, patternsList) {
 				name: pattern[0],
 				text: pattern[1]
 			};
-			
+
 			runUpload(url, data);
 		}
-		
-	}    
+
+	}
 }
 
 function runUpload(url, data) {
-	
+
 	fetch(url, {
-        method: 'POST',
+		method: 'POST',
 		headers: {
-            'Content-Type': 'application/json'
-        },
-		mode: 'cors',        
-        body: JSON.stringify(data)
-    })
-    .then(response => response.json())
-    .then(data => {
-        console.log('Message sent successfully:', data);
-		showLog(`Завантаженно шаблон ${data.name}`);
-    })
-    .catch(error => {
-        console.error('Error sending message:', error);
-    });
+			'Content-Type': 'application/json'
+		},
+		mode: 'cors',
+		body: JSON.stringify(data)
+	})
+		.then(response => response.json())
+		.then(data => {
+			console.log('Message sent successfully:', data);
+			showLog(`Завантаженно шаблон ${data.name}`);
+		})
+		.catch(error => {
+			console.error('Error sending message:', error);
+		});
 }
 
 async function getTicketText() {
 	let txt = '';
 	await getData('ticketTextClose').then(value => {
 		if (value) {
-			txt =  `Проблема: <br /> ${value} <br /> <br />`;
-		} 
+			txt = `Проблема: <br /> ${value} <br /> <br />`;
+		}
 
 	});
 	return txt;
@@ -276,7 +301,7 @@ async function getTicketText() {
 
 async function getData(key) {
 	const gettingItem = await browser.storage.local.get(key);
-    return gettingItem[key];
+	return gettingItem[key];
 
 }
 
@@ -292,7 +317,7 @@ async function getData(key) {
 		if (value) {
 			username.value = value;
 		}
-        
+	    
 		getData('password').then(value => {
 			if (value) {
 				password.value = value;
@@ -309,7 +334,7 @@ loginForm.addEventListener("submit", (e) => {
   
 
   if (username.value == "" || password.value == "") {
-    alert("Заповніть обидва поля!");
+	alert("Заповніть обидва поля!");
   } else {
 	  
 	  //changeIcon();
@@ -327,17 +352,17 @@ loginForm.addEventListener("submit", (e) => {
 
 async function setData(username, password) {
 	try {
-            await browser.storage.local.set({ 'username': username, 'password': password });
-        } catch (error) {
-            console.error('Error setting tickets to storage:', error);
-        }
+			await browser.storage.local.set({ 'username': username, 'password': password });
+		} catch (error) {
+			console.error('Error setting tickets to storage:', error);
+		}
 		console.log('set');
 }
 
 async function getData(key) {
 	const gettingItem = await browser.storage.local.get(key);
-    console.log('gettingItem', gettingItem[key]);
-    return gettingItem[key];
+	console.log('gettingItem', gettingItem[key]);
+	return gettingItem[key];
 
 }
 

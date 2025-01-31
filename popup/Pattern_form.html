@@ -10,6 +10,7 @@
   <div class="login-page">
 	  <nav class="menu">
 		<a href="./Pattern_form.html">Шаблони</a>
+		<!-- <a href="./PatternOTRS_form.html">OTRS</a> -->
 		<a href="./waiting_form.html">Очікування</a>
 		<a href="./block_form.html">Блокування</a>
 		<a href="./login_form.html">Авторизація</a>
@@ -17,41 +18,28 @@
 	  </nav>
   
 	  <div class="form">
-	  <!--
-		<form class="register-form">
-		  <input type="text" placeholder="name"/>
-		  <input type="password" placeholder="password"/>
-		  <input type="text" placeholder="email address"/>
-		  <button>create</button>
-		  <p class="message">Already registered? <a href="#">Sign In</a></p>
-		</form>
-		-->
 		<form ation="" class="login-form" id="loginForm">
-		  <label for="patternTag" class="message">Група шаблонів</label>
-		  <select id="patternTag">
-			  <option value="">-- Всі групи --</option>
-		  </select>
-		  
-		  <label for="patternName" class="message">Назва шаблону</label>
-		  <select id="patternName">
-		  </select>
-		  
-		  <label for="patternText" class="message">Текст шаблону</label>
-		  <textarea id="patternText" rows="8"> 
-		  </textarea>
-		  
-		  <!--
-		  <input id="username" type="text" placeholder="Ім'я користувача"/>
-		  <label for="password" class="message">Пароль</label>
-		  <input id="password" type="password" placeholder="Пароль"/>
-		  -->
-		  <button type="submit">Вставити текст</button>
-		  
-		  <!--
-		  <p class="message">Not registered? <a href="#">Create an account</a></p>
-		  -->
+			<label for="patternTag" class="message">Група шаблонів</label>
+			<select id="patternTag">
+				<option value="">-- Всі групи --</option>
+			</select>
+		
+			<label for="patternName" class="message">Назва шаблону</label>
+			<select id="patternName">
+			</select>
+		
+			<label for="patternText" class="message">Текст шаблону</label>
+			<textarea id="patternText" rows="8">
+				  </textarea>
+
+			<input id="isAddProblem" checked="true" type="checkbox" />
+			<label for="isAddProblem" class="">Додати проблему</label></br>
+			<div class="button-container">
+				<button type="submit">Вставити шаблон</button>
+				<button type="button" id="insertProblem">Вставити лише проблему</button>
+			</div>
+
 		</form>
-		<!--<button id="loadToServer" style="display: none;"> -->
 		<button id="loadToServer">Завантажити на сервер</button>
 	  </div>
 	</div>
