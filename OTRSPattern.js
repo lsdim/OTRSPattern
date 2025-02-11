@@ -21,7 +21,7 @@ let columns = getColumns();
 
 
 //**********************************************************************************************
-const intervalID = setInterval(modTicket, 30000, columns);
+const intervalID = setInterval(modTicket, 10000, columns);
 modTicket(columns);
 
 
