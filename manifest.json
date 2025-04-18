@@ -21,6 +21,8 @@
     "storage",
     "*://api.telegram.org/*",
     "*://*.ukrposhta.ua/*",
+    "*://identitytoolkit.googleapis.com/*",
+    "*://otrs-patterns-default-rtdb.europe-west1.firebasedatabase.app*",
 	"activeTab"
   ],
   

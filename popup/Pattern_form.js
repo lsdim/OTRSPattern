@@ -6,8 +6,12 @@ document.querySelectorAll('.menu a').forEach(link => {
 });
 
 
-const DBUrl = 'https://otrs-patterns-default-rtdb.europe-west1.firebasedatabase.app/patterns.json';
 
+// let token = {};
+// let user = {};
+const apiKey = 'AIzaSyDDQPP3Csks1c6p-gwZPXKHoLec1yQmkAo';
+const DBUrl = 'https://otrs-patterns-default-rtdb.europe-west1.firebasedatabase.app/patterns.json';
+const AuthUrl = `https://identitytoolkit.googleapis.com/v1/accounts:signInWithPassword?key=${apiKey}`;
 
 const loginForm = document.getElementById('loginForm');
 
@@ -20,6 +24,17 @@ const problemButton = document.getElementById('insertProblem');
 
 const isAddProblem = document.getElementById("isAddProblem");
 
+
+// async function getDataByKey() {
+// 	await getData('token').then(value => {
+// 		token = value ? { ...value } : {};
+// 	});
+// }
+
+// getDataByKey();
+
+
+// console.log('token', token);
 
 
 /*const patterns = [
@@ -139,6 +154,12 @@ function getPatternsByTag(patterns, tag) {
 
 async function getPatternsFromDB(url) {
 	try {
+		const token = await getToken();
+		if (!token.idToken) {
+			alert('Не вдалося отримати дані. Перевірте логін і пароль.');
+			return;
+		}
+		url = url + `?auth=${token.idToken}`;
 		const responseID = await fetch(url);
 		if (!responseID.ok) {
 			throw new Error('Network response was not ok for the first fetch');
@@ -237,8 +258,15 @@ function showLog(message) {
 	patternText.value = patternText.value + `\n${message}`;
 }
 
-function uploadPatterns(tag, patternsList) {
-	const url = `https://otrs-patterns-default-rtdb.europe-west1.firebasedatabase.app/patterns/${tag}/pattern.json`;
+async function uploadPatterns(tag, patternsList) {
+	let url = `https://otrs-patterns-default-rtdb.europe-west1.firebasedatabase.app/patterns/${tag}/pattern.json`;
+
+	const token = await getToken();
+	if (!token.idToken) {
+		alert('Не вдалося завантажити дані. Перевірте логін і пароль.');
+		return;
+	}
+	url = url + `?auth=${token.idToken}`;
 
 	const patternsArray = patternsList.split('@');
 	patternText.value = `Завантаження шаблонів ${patternsArray.length} шт.`
@@ -252,6 +280,11 @@ function uploadPatterns(tag, patternsList) {
 
 		const pattern = patternsArray[i].split('$');
 
+		if (pattern.length < 2) {
+			showLog(`Неправильний шаблон (${pattern})`);
+			continue;
+		}
+
 		if (pattern[0].trim() === '' || pattern[1].trim() === '') {
 			showLog("Порожнє ім'я або текст");
 			console.log("Порожнє ім'я або текст", pattern);
@@ -262,31 +295,104 @@ function uploadPatterns(tag, patternsList) {
 				text: pattern[1]
 			};
 
-			runUpload(url, data);
+			let uploadData = {};
+			await runPost(url, data).then(response => {
+				uploadData = { ...response };
+			});
+
+			console.log('Message sent successfully:', uploadData);
+			showLog(`Завантажено шаблон ${uploadData.name}`);
 		}
 
 	}
 }
 
-function runUpload(url, data) {
+async function getToken() {
 
-	fetch(url, {
-		method: 'POST',
-		headers: {
-			'Content-Type': 'application/json'
-		},
-		mode: 'cors',
-		body: JSON.stringify(data)
-	})
-		.then(response => response.json())
-		.then(data => {
-			console.log('Message sent successfully:', data);
-			showLog(`Завантаженно шаблон ${data.name}`);
-		})
-		.catch(error => {
-			console.error('Error sending message:', error);
-		});
+	let token = {};
+	await getData('token').then(value => {
+		token = value ? { ...value } : {};
+	});
+
+	if (token.expiresIn) {
+		const dateExp = new Date(token.expiresIn);
+		if (new Date() > dateExp) {
+			console.log('Token expired');
+			token = await login();
+		} else {
+			console.log('token.expiresIn', token.expiresIn);
+		}
+	} else {
+		token = await login();
+	}
+
+	return token;
 }
+
+async function login() {
+	let user = {};
+	await getData('user').then(value => {
+		if (value) {
+			user = { ...value };
+		}
+	});
+
+	if (!user.username || !user.password) {
+		alert('Не вказано логін або пароль');
+		return {};
+	}
+
+	const data = {
+		email: `${user.username}@ukrposhta.ua`,
+		password: user.password,
+		returnSecureToken: true
+	};
+
+	let loginData = {};
+	await runPost(AuthUrl, data).then(response => {
+		loginData = { ...response };
+	});
+
+	if (loginData.error) {
+		alert(loginData.error.message);
+		return {};
+	}
+
+	const dateExp = new Date(new Date().getTime() + +loginData.expiresIn * 1000);
+	const token = {
+		idToken: loginData.idToken,
+		expiresIn: dateExp.toString()
+	};
+	await setData('token', token);
+
+	return token;
+
+}
+
+async function runPost(url, data) {
+
+	try {
+		const responseID = await fetch(url, {
+			method: 'POST',
+			headers: {
+				'Content-Type': 'application/json'
+			},
+			mode: 'cors',
+			body: JSON.stringify(data)
+		});
+		if (!responseID.ok) {
+			console.log('responseID', responseID);
+			// throw new Error(responseID);
+		}
+
+		const json = await responseID.json();
+		return json;
+
+	} catch (error) {
+		console.error('There has been a problem:', error);
+	}
+}
+
 
 async function getTicketText() {
 	let txt = '';
@@ -305,73 +411,11 @@ async function getData(key) {
 
 }
 
-
-
-
-
-
-
-/*
-
- getData('username').then(value => {
-		if (value) {
-			username.value = value;
-		}
-	    
-		getData('password').then(value => {
-			if (value) {
-				password.value = value;
-			}			
-		});
- });
-
-    
-
-
-loginForm.addEventListener("submit", (e) => {
-  e.preventDefault();
-  
-  
-
-  if (username.value == "" || password.value == "") {
-	alert("Заповніть обидва поля!");
-  } else {
-	  
-	  //changeIcon();
-	  setData(username.value, password.value);
-	  alert("Збережено!");
-
-  }
-  
-  console.log('submit');
-
-  // handle submit
-});
-
-
-
-async function setData(username, password) {
+async function setData(key, value) {
 	try {
-			await browser.storage.local.set({ 'username': username, 'password': password });
-		} catch (error) {
-			console.error('Error setting tickets to storage:', error);
-		}
-		console.log('set');
-}
-
-async function getData(key) {
-	const gettingItem = await browser.storage.local.get(key);
-	console.log('gettingItem', gettingItem[key]);
-	return gettingItem[key];
+		await browser.storage.local.set({ [key]: value });
+	} catch (error) {
+		console.error(`Error setting ${key} to storage:`, error);
+	}
 
 }
-
-function setItem() {
-  console.log("OK");
-}
-
-function onError(error) {
-  console.log(error);
-}
-
-*/
