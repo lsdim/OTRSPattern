@@ -7,8 +7,6 @@ document.querySelectorAll('.menu a').forEach(link => {
 
 
 
-// let token = {};
-// let user = {};
 const apiKey = 'AIzaSyDDQPP3Csks1c6p-gwZPXKHoLec1yQmkAo';
 const DBUrl = 'https://otrs-patterns-default-rtdb.europe-west1.firebasedatabase.app/patterns.json';
 const AuthUrl = `https://identitytoolkit.googleapis.com/v1/accounts:signInWithPassword?key=${apiKey}`;

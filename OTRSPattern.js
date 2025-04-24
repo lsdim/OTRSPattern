@@ -65,6 +65,8 @@ async function modTicket(columns) {
 
 
 	checkFAQ();
+	InsertFull();
+	showPatternHistory();
 
 
 
@@ -163,6 +165,135 @@ async function modTicket(columns) {
 
 }
 
+async function InsertFull() {
+	if (!isTicketZoom() && !isDashboard()) {
+		if (document.getElementsByClassName('FAQ').length > 0) {
+			if (document.getElementsByClassName('FAQ')[0].contentWindow.document.getElementById('InsertFull')) {
+				if (document.getElementsByClassName('FAQ')[0].contentWindow.document.getElementById('SavePatternsHistory')) {
+					return;
+				}
+
+				const loadButton = document.getElementsByClassName('FAQ')[0].contentWindow.document.getElementById('InsertFull');
+				let i = document.createElement('i');
+				i.id = 'SavePatternsHistory';
+				i.className = 'fa fa-list';
+				// i.style = "display:none;";
+				loadButton.appendChild(i);
+
+				loadButton.addEventListener("click", getPatternsHistoryList);
+
+				// console.log('InsertFull1111');
+			}
+
+		}
+	}
+}
+
+async function getPatternsHistoryList() {
+	let patternsHistoryList = [];
+	await getData('patternsHistoryList').then(value => {
+		patternsHistoryList = value ? [...value] : [];
+	});
+
+	let pattern = {};
+
+
+	let pTitle = document.getElementsByClassName('Headline');
+	if (pTitle.length > 0) {
+		let title = pTitle[0].innerText.split(' - ');
+		pattern.title = title[1].trim();
+		pattern.id = title[0].split(' ')[1].trim();
+	}
+
+	let pUrl = document.getElementsByTagName('iframe');
+	if (pUrl.length > 0) {
+		let url = pUrl[0].src.split(';');
+		pattern.url = url[0] + ';' + url[2] + ';Nav=None';
+	}
+
+	pattern.date = new Date();
+
+	patternsHistoryList.push(pattern);
+	if (patternsHistoryList.length > 10) {
+		patternsHistoryList.pop();
+	}
+	console.log('patternsHistoryList', patternsHistoryList);
+	await setData('patternsHistoryList', patternsHistoryList);
+
+}
+
+async function showPatternHistory() {
+
+	if (document.getElementsByClassName('FAQ').length > 0) {
+		const overviewBody = document.getElementsByClassName('FAQ')[0].contentWindow.document.getElementById('OverviewBody');
+		if (overviewBody) {
+			if (document.getElementsByClassName('FAQ')[0].contentWindow.document.getElementById('patternsHistoryList')) {
+				return;
+			}
+
+			let patternsHistoryList = [];
+			await getData('patternsHistoryList').then(value => {
+				patternsHistoryList = value ? [...value] : [];
+			});
+
+			if (patternsHistoryList.length > 0) {
+				let table = document.createElement('table');
+				table.id = 'patternsHistoryList';
+				table.className = 'DataTable';
+				let thead = document.createElement('thead');
+				let tr = document.createElement('tr');
+				let th = document.createElement('th');
+				th.innerText = 'FAQ#';
+				tr.appendChild(th);
+				th = document.createElement('th');
+				th.innerText = 'Назва';
+				tr.appendChild(th);
+				th = document.createElement('th');
+				th.innerText = 'Дата використання';
+				tr.appendChild(th);
+				thead.appendChild(tr);
+				table.appendChild(thead);
+				let tbody = document.createElement('tbody');
+				patternsHistoryList.forEach(pattern => {
+					let tr = document.createElement('tr');
+					tr.className = 'MasterAction';
+					let td = document.createElement('td');
+					let a = document.createElement('a');
+					a.href = pattern.url;
+					a.className = 'AsBlock MasterActionLink';
+					a.innerText = pattern.id;
+					td.appendChild(a);
+					tr.appendChild(td);
+					td = document.createElement('td');
+					td.innerText = pattern.title;
+					tr.appendChild(td);
+					td = document.createElement('td');
+					td.innerText = pattern.date.toLocaleString();
+					tr.appendChild(td);
+
+					tr.addEventListener("click", function () {
+						window.location.href = pattern.url;
+					});
+
+					tbody.appendChild(tr);
+				});
+
+
+				if (overviewBody) {
+					overviewBody.appendChild(table);
+					table.appendChild(tbody);
+				}
+
+
+			}
+		} else {
+			console.log('No OverviewBody');
+		}
+	}
+
+}
+
+
 
 async function checkFAQ() {
 	if (!isTicketZoom() && !isDashboard()) {
@@ -192,7 +323,7 @@ async function checkFAQ() {
 
 
 				}
-				console.log('FAQ');
+				// console.log('FAQ');
 			} else {
 				console.log('Sorry? Not FAQ');
 			}
