@@ -21,7 +21,7 @@ let columns = getColumns();
 
 
 //**********************************************************************************************
-const intervalID = setInterval(modTicket, 10000, columns);
+const intervalID = setInterval(modTicket, 4000, columns);
 modTicket(columns);
 
 
@@ -198,14 +198,14 @@ async function getPatternsHistoryList() {
 	let pattern = {};
 
 
-	let pTitle = document.getElementsByClassName('Headline');
+	let pTitle = document.getElementsByClassName('FAQ')[0].contentWindow.document.getElementsByClassName('Headline');
 	if (pTitle.length > 0) {
-		let title = pTitle[0].innerText.split(' - ');
+		let title = pTitle[0].innerText.split('—');
 		pattern.title = title[1].trim();
 		pattern.id = title[0].split(' ')[1].trim();
 	}
 
-	let pUrl = document.getElementsByTagName('iframe');
+	let pUrl = document.getElementsByClassName('FAQ')[0].contentWindow.document.getElementsByTagName('iframe');
 	if (pUrl.length > 0) {
 		let url = pUrl[0].src.split(';');
 		pattern.url = url[0] + ';' + url[2] + ';Nav=None';
@@ -213,11 +213,16 @@ async function getPatternsHistoryList() {
 
 	pattern.date = new Date();
 
-	patternsHistoryList.push(pattern);
+	const index = patternsHistoryList.findIndex(elem => elem.id === pattern.id);
+	if (index > -1) {
+		patternsHistoryList.splice(index, 1);
+	}
+
+	patternsHistoryList.unshift(pattern);
 	if (patternsHistoryList.length > 10) {
 		patternsHistoryList.pop();
 	}
-	console.log('patternsHistoryList', patternsHistoryList);
+	// console.log('patternsHistoryList', patternsHistoryList);
 	await setData('patternsHistoryList', patternsHistoryList);
 
 }
@@ -271,9 +276,9 @@ async function showPatternHistory() {
 					td.innerText = pattern.date.toLocaleString();
 					tr.appendChild(td);
 
-					tr.addEventListener("click", function () {
-						window.location.href = pattern.url;
-					});
+					// tr.addEventListener("click", function () {
+					// 	window.location = pattern.url;
+					// });
 
 					tbody.appendChild(tr);
 				});
@@ -286,8 +291,6 @@ async function showPatternHistory() {
 
 
 			}
-		} else {
-			console.log('No OverviewBody');
 		}
 	}
 
@@ -323,13 +326,10 @@ async function checkFAQ() {
 
 
 				}
-				// console.log('FAQ');
 			} else {
 				console.log('Sorry? Not FAQ');
 			}
 
-		} else {
-			console.log('Not FAQ');
 		}
 	}
 }
@@ -459,8 +459,8 @@ async function saveTicketText() {
 	
 	
 	const rows = document.getElementsByClassName("MasterAction");
-
-
+	
+	
 	/*
 	0: "Пріоритет"​
 	1: "Нове повідомлення"​
@@ -485,21 +485,21 @@ async function saveTicketText() {
 	const customerNameId = columns.findIndex(el => el === "Ім'я клієнта");
 	const ticketTagId = columns.findIndex(el => el === 'Тег заявки');
 	const queueId = columns.findIndex(el => el === 'Черга');
-
+	
 	//console.log('columns',columns);
-
-
-
-
+	
+	
+	
+	
 	//console.log(rows);
-
+	
 	/*const tmp = getTickets();
 	let tickets = [];
 	tmp.tickets ? tickets = [...tmp.tickets] : console.log('tmp',tmp);
 	*/
 /*
 	let tickets = [];
-
+	
 		let gettingItem = browser.storage.local.get('tickets');
 		 gettingItem.then(tck => {
 			 
@@ -535,7 +535,7 @@ async function saveTicketText() {
 							 
 							
 							);		
-
+	
 						*/
 /*							
 						}
@@ -548,7 +548,7 @@ async function saveTicketText() {
 						if (minute === 05) {
 						
 						//let ticketsCount = document.getElementById('Dashboard0130-TicketOpenAll').innerText.split('(')[1].split(')')[0]; 
-
+	
 						//sendMessage(
 						//	'<tg-emoji emoji-id="5368324170671202286">📯</tg-emoji>' + ` Зараз є ${+ticketsCount} ${getKindTicket(ticketsCount)} `
 						//	);
@@ -573,10 +573,10 @@ async function saveTicketText() {
 					
 				} 
 			}
-
+	
 		}, onError);
 }
-
+	
 */
 
 
@@ -1380,7 +1380,7 @@ function isDashboard() {
 	if (window.location.href != 'http://help.ukrposhta.loc/otrs/index.pl?Action=AgentDashboard' &&
 		window.location.href != 'http://help.ukrposhta.loc/otrs/index.pl?' &&
 		window.location.href != 'http://help.ukrposhta.loc/otrs/index.pl?Action=AgentTicketLockedView') {
-		console.log('Not Dashboard', window.location.href);
+		// console.log('Not Dashboard', window.location.href);
 		return false;
 	}
 
