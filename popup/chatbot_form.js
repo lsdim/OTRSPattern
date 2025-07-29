@@ -1,4 +1,3 @@
-﻿
 document.querySelectorAll('.menu a').forEach(link => {
     if (link.href === window.location.href) {
         link.classList.add('active');
@@ -10,10 +9,18 @@ const chatbotForm = document.getElementById('chatbotForm');
 const chatActive = document.getElementById("isActive");
 const chatId = document.getElementById("chatId");
 const botId = document.getElementById("botId");
+const tokenStatus = document.getElementById("tokenStatus");
 
 let chatBot = {};
 
 checkboxChecked();
+updateTokenStatus();
+
+browser.storage.onChanged.addListener((changes, area) => {
+  if (area === 'local' && changes.botTokenStatus) {
+    updateTokenStatus();
+  }
+});
 
 
 chatActive.addEventListener("change", () => {
@@ -28,12 +35,6 @@ chatActive.addEventListener("change", () => {
 			chatActive.checked = chatBot.isActive;
 			checkboxChecked();
 		}
-        
-		/*getData('botId').then(value => {
-			if (value) {
-				botId.value = value;
-			}			
-		});*/
  });
 
     
@@ -55,9 +56,6 @@ chatbotForm.addEventListener("submit", (e) => {
 
   }
   
-  //console.log('submit');
-
-  // handle submit
 });
 
 function checkboxChecked() {
@@ -70,19 +68,23 @@ function checkboxChecked() {
 	  }
 }
 
+async function updateTokenStatus() {
+    const status = await getData('botTokenStatus');
+    if (status) {
+        tokenStatus.textContent = `Статус токена: ${status}`;
+    }
+}
+
 async function setData(chatBot) {
 	try {
             await browser.storage.local.set({'chatBot': chatBot});
         } catch (error) {
             console.error('Error setting tickets to storage:', error);
         }
-		console.log('set');
 }
 
 async function getData(key) {
 	const gettingItem = await browser.storage.local.get(key);
-   // console.log('gettingItem', gettingItem[key]);
     return gettingItem[key];
 
 }
-

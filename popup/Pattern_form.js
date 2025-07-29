@@ -4,9 +4,6 @@ document.querySelectorAll('.menu a').forEach(link => {
 	}
 });
 
-
-
-
 const DBUrl = 'https://otrs-patterns-default-rtdb.europe-west1.firebasedatabase.app/patterns.json';
 let AuthUrl = '';
 
@@ -21,41 +18,6 @@ const problemButton = document.getElementById('insertProblem');
 
 const isAddProblem = document.getElementById("isAddProblem");
 
-
-// async function getDataByKey() {
-// 	await getData('token').then(value => {
-// 		token = value ? { ...value } : {};
-// 	});
-// }
-
-// getDataByKey();
-
-
-// console.log('token', token);
-
-
-/*const patterns = [
-				{tag: 'АРМ ВЗ', pattern: [
-					{name: 'Помилка друку принтера з АРМ ВЗ', text: 'Налаштовано формат вихідного паперу'},
-					{name: 'Не можна закрити день', text: 'Є ПВ виданні в доставку, термін зберігання яких закінчився'},
-				]},
-
-				{tag: 'Pos-terminal', pattern: [
-					{name: 'Не працює термінал', text: "Не було з'єднання з терміналом через завислий ЮСБ-хаб \nНалаштовано підключення терміналу через езернет, щоб не бути залежним від ЮСБ-хабу"},
-					{name: 'Не працює термінал', text: "Під час спілкування з заявником , останній виконав перезавантаження терміналу – ПОС термінал запрацював."}
-				]},
-				{tag: 'Інтернет	', pattern: [
-					{name: 'Відсутня мережа інтернет по всьому відділенні 1', text: 'інтернет перевірено, працює стабільно'},
-					{name: 'Відсутня мережа інтернет по всьому відділенні 2', text: 'перезавантажте обладнання провайдера, інтернет працює'},
-					{name: 'Відсутня мережа інтернет по всьому відділенні 3', text: 'перезавантажено обладнання провайдера, інтернет не запрацюював. Перевірено працездатність резервного інтернету, ........'},
-					{name: 'Відсутня мережа інтернет по всьому відділенні 4', text: 'Перед ввімкненням ПК необхідно переконатись у тому, що інтернет-обладнання вже запустилось. На даний момент інтернет перевірено, працює стабільно.'}
-				]}
-	 
-				];
-				
-*/
-
-//const patterns = 
 setValues();
 
 async function setValues() {
@@ -65,31 +27,22 @@ async function setValues() {
 
 	const patterns = await getPatternsFromDB(DBUrl);
 
-	//const patterns = Object.values(newPatterns);
-	//console.log('newPatterns', newPatterns);
-
-
 	fillPattertTag(patterns)
 
 	getPatternsByTag(patterns);
 
 	patternTag.addEventListener("change", (event) => {
-		//console.log('patterns', patterns);
 		getPatternsByTag(patterns, event.target.value);
 	});
 
 	patternName.addEventListener("change", (event) => {
-		//console.log('patternName', event.target.value);
 		getPatternsTextByName(patterns, event.target.value, patternTag.value);
 	});
-
-	//return patterns;
 }
 
 function fillPattertTag(patterns) {
 	for (const key in patterns) {
 		let opt = document.createElement('option');
-		//console.log('patterns['+key+']',patterns[key]);
 		opt.value = key;
 		opt.innerHTML = patterns[key].tag;
 		patternTag.appendChild(opt);
@@ -98,18 +51,15 @@ function fillPattertTag(patterns) {
 
 function getPatternsTextByName(patterns, id, tag) {
 
-	//console.log('getPatternsByName', patterns);
 	if (!tag) {
 		for (const key in patterns) {
 			if (Object.keys(patterns[key].pattern).includes(id)) {
 				patternText.value = patterns[key].pattern[id].text;
-				//patternText.value = patternText.innerHTML;
 				return;
 			}
 		}
 	} else {
 		patternText.value = patterns[tag].pattern[id].text;
-		//patternText.value = patternText.innerHTML;
 	}
 
 }
@@ -119,22 +69,17 @@ function getPatternsByTag(patterns, tag) {
 	patternName.innerHTML = null;
 
 	let newPatterns;
-	//console.log('newPatterns1', newPatterns, patterns);
-	//console.log('tag', tag);
 
 	if (tag) {
-		newPatterns = { tag: patterns[tag] }; //.filter((patt) =>(patt.tag === tag));
+		newPatterns = { tag: patterns[tag] };
 	} else {
 		newPatterns = patterns;
 	};
 
-	//console.log('newPatterns2', newPatterns, patterns);
 	let i = 0;
 	let j = 0;
 	for (const key in newPatterns) {
-		//console.log('key', key);
 		for (const keyPatt in newPatterns[key].pattern) {
-			//console.log('keyPatt', keyPatt);
 			let opt = document.createElement('option');
 			opt.value = keyPatt;
 			opt.innerHTML = newPatterns[key].pattern[keyPatt].name;
@@ -166,7 +111,6 @@ async function getPatternsFromDB(url) {
 		}
 
 		const json = await responseID.json();
-		//console.log('json', json);
 		return json;
 
 	} catch (error) {
@@ -177,7 +121,6 @@ async function getPatternsFromDB(url) {
 
 
 loadButton.addEventListener("click", (e) => {
-	//e.preventDefault();
 
 	if (!patternTag.value) {
 		alert("Виберіть групу!");
@@ -186,10 +129,6 @@ loadButton.addEventListener("click", (e) => {
 
 	uploadPatterns(patternTag.value, patternText.value);
 
-
-	console.log('loadButton');
-
-	// handle submit
 });
 
 let ticketText = '';
@@ -219,7 +158,6 @@ loginForm.addEventListener("submit", (e) => {
 
 	runScript(patternText.value, ticketText);
 
-	console.log('submit');
 	window.close();
 });
 
@@ -296,7 +234,7 @@ async function uploadPatterns(tag, patternsList) {
 			};
 
 			let uploadData = {};
-			await runPost(url, data).then(response => {
+			await runPost(url, response => {
 				uploadData = { ...response };
 			});
 
@@ -383,7 +321,6 @@ async function runPost(url, data) {
 		});
 		if (!responseID.ok) {
 			console.log('responseID', responseID);
-			// throw new Error(responseID);
 		}
 
 		const json = await responseID.json();

@@ -2,11 +2,8 @@ console.log('start');
 
 let user = {};
 
-const dev_chat = '-4228417669';
-const prod_chat = '-4267367123';
-
-const BOT_TOKEN = '7255647619:AAH0dKnIaCsFRx7Dg2qyezOWuum4ItZBkec';
-//const CHAT_ID = dev_chat;
+//const dev_chat = '-4228417669';
+//const prod_chat = '-4267367123';
 
 let chatBot = {
 	'isActive': false,
@@ -14,12 +11,16 @@ let chatBot = {
 	'botId': '7255647619'
 };
 
-
-//document.body.style.border = "2px solid red";
 let columns = getColumns();
 
+updateBotToken();
 
-//**********************************************************************************************
+browser.runtime.onMessage.addListener((message) => {
+    if (message.command === "credentialsUpdated") {
+      updateBotToken();
+    }
+});
+
 const intervalID = setInterval(modTicket, 4000, columns);
 modTicket(columns);
 
@@ -49,8 +50,6 @@ async function modTicket(columns) {
 
 	await delay(200);
 
-	//console.log('modTicket');
-
 	const now = new Date();
 	const minute = now.getMinutes();
 	const hours = now.getHours();
@@ -67,15 +66,6 @@ async function modTicket(columns) {
 	InsertFull();
 	showPatternHistory();
 
-
-
-	/*	
-		if (checkNetError()) {
-			console.log('checkNetError');
-			window.location.reload();
-			return;
-		}
-		*/
 
 	if (checkLogin()) {
 
@@ -94,11 +84,7 @@ async function modTicket(columns) {
 
 			if (hours >= 8 && hours < 21) {
 				if ([5, 20, 35, 50].includes(minute)) {
-					if (loginError) {
-						sendMessage('<blockquote>' + loginError + '</blockquote>\t\n' + getAnswer(answersLogin));
-					} else {
-						sendMessage(getAnswer(answersLogin));
-					}
+					sendMessage('<blockquote>' + loginError + '</blockquote>	' + getAnswer(answersLogin));
 
 				}
 			}
@@ -110,12 +96,6 @@ async function modTicket(columns) {
 		console.log('isTicketZoom()', isTicketZoom());
 		const row1 = document.getElementById('Row1');
 		if (row1) {
-			/*console.log('row1',row1);
-			row1.addEventListener("click", function() {
-				delay(1000);
-				addTagToText();
-				console.log('addClick row1');
-			});*/
 		}
 
 		addTagToText();
@@ -147,7 +127,6 @@ async function modTicket(columns) {
 	idList.queueId = columns.findIndex(el => el === 'Черга');
 
 	document.querySelectorAll('.Pagination a').forEach(link => {
-		//console.log('link',link);
 		link.addEventListener('click', function () {
 			modTicket(columns);
 		});
@@ -176,12 +155,10 @@ async function InsertFull() {
 				let i = document.createElement('i');
 				i.id = 'SavePatternsHistory';
 				i.className = 'fa fa-list';
-				// i.style = "display:none;";
 				loadButton.appendChild(i);
 
 				loadButton.addEventListener("click", getPatternsHistoryList);
 
-				// console.log('InsertFull1111');
 			}
 
 		}
@@ -221,7 +198,6 @@ async function getPatternsHistoryList() {
 	if (patternsHistoryList.length > 10) {
 		patternsHistoryList.pop();
 	}
-	// console.log('patternsHistoryList', patternsHistoryList);
 	await setData('patternsHistoryList', patternsHistoryList);
 
 }
@@ -274,10 +250,6 @@ async function showPatternHistory() {
 					td = document.createElement('td');
 					td.innerText = pattern.date.toLocaleString();
 					tr.appendChild(td);
-
-					// tr.addEventListener("click", function () {
-					// 	window.location = pattern.url;
-					// });
 
 					tbody.appendChild(tr);
 				});
@@ -374,8 +346,6 @@ async function getFAQText(url) {
 		const text = await response.text();
 		const html = stringToHTML(text);
 
-		// const content = html.getElementsByTagName('body');
-		// console.log('html', html.innerHTML, content);
 		if (!html) {
 			console.error('FAQ not found in content');
 			return null;
@@ -416,171 +386,11 @@ async function saveTicketText() {
 	const ticketURL = window.location.href;
 	const ticketText = await getTicketText(ticketURL); // Асинхронний виклик
 
-	// console.log('ticketTextClose', ticketText.split('***')[0]);
 	const ticketTextClear = ticketText.split('***')[0];
 	await setData('ticketTextClose', ticketTextClear);
 
 }
 
-
-///************************************************************************************************
-
-
-
-
-
-
-
-
-
-
-
-
-//const intervalID = setInterval(checkNewTicket, 60000, columns);
-
-
-
-/*async function checkNewTicket(columns) {
-	
-	const now = new Date();
-	const minute = now.getMinutes();
-	const hours  = now.getHours()
-	
-	if (checkLogin()) {
-		if (hours >= 8 && hours < 21) {						
-			if (minute === 05 || minute === 20 || minute === 35 || minute === 50) {
-				sendMessage(getAnswerLogin());
-			}
-		}
-		return;
-	}
-	
-	
-	
-	const rows = document.getElementsByClassName("MasterAction");
-	
-	
-	/*
-	0: "Пріоритет"
-	1: "Нове повідомлення"
-	2: "TicketNumber"
-	3: "Створено"
-	4: "Відкрита"
-	5: "Заголовок"
-	6: "Стан"
-	7: "Власник"
-	8: "Ім'я клієнта"
-	9: "Тег заявки"
-	10: "Черга"
-	*/
-
-/*	
-	const ticketNumId = columns.findIndex(el => el === 'TicketNumber');
-	const createdId = columns.findIndex(el => el === 'Створено');
-	const ageId = columns.findIndex(el => el === 'Відкрита');
-	const titleId = columns.findIndex(el => el === 'Заголовок');
-	const stateId = columns.findIndex(el => el === 'Стан');
-	const ownerId = columns.findIndex(el => el === 'Власник');
-	const customerNameId = columns.findIndex(el => el === "Ім'я клієнта");
-	const ticketTagId = columns.findIndex(el => el === 'Тег заявки');
-	const queueId = columns.findIndex(el => el === 'Черга');
-	
-	//console.log('columns',columns);
-	
-	
-	
-	
-	//console.log(rows);
-	
-	/*const tmp = getTickets();
-	let tickets = [];
-	tmp.tickets ? tickets = [...tmp.tickets] : console.log('tmp',tmp);
-	*/
-/*
-	let tickets = [];
-	
-		let gettingItem = browser.storage.local.get('tickets');
-		 gettingItem.then(tck => {
-			 
-			 tck.tickets ? tickets = [...tck.tickets] : console.log('tck',tck);
-			 
-			 console.log('tickets', tickets);		 
-			 
-			 
-			 if (rows) {
-				if (rows.length>0) {
-					for (let i=0; i<rows.length; i++) {					
-						if (tickets.findIndex(ticket => ticket === getInnerText(rows[i],ticketNumId)) === -1 && getInnerText(rows[i],stateId) === 'Призначена') {
-							tickets.push(getInnerText(rows[i],ticketNumId));
-							console.log('tickets - ' + i, tickets);
-							
-							
-							const ticketURL = getTicketURL(rows[i], ticketNumId);
-							
-							getArticleID(ticketURL);
-								
-							console.log('tcktText end');
-							
-						/*	sendMessage(
-							'<tg-emoji emoji-id="5368324170671202286">🚨</tg-emoji>' +columns[ticketNumId] 
-							+ '<tg-emoji emoji-id="5368324170671202286">🚨</tg-emoji>' + '\t\n<b>' + getInnerText(rows[i],ticketNumId) + '</b>\t\n\n'  
-							+ columns[createdId] + '\t\n<b>' + getInnerText(rows[i],createdId) + ' (' + getInnerText(rows[i],ageId) + ')</b>\t\n\n' 
-							+ columns[ticketTagId] + '\t\n<b>' + getInnerText(rows[i],ticketTagId) + '</b>\t\n\n'
-							+ columns[titleId] + '\t\n<b>' + getInnerText(rows[i],titleId) + '</b>\t\n\n' 
-							+ columns[customerNameId] + ' <tg-emoji emoji-id="5368324170671202286">😭</tg-emoji>' 
-							+ '\t\n<b>' + getInnerText(rows[i],customerNameId) + '</b>\t\n\n'
-							+ columns[stateId] + '\t\n<b>' + getInnerText(rows[i],stateId) + '</b>\t\n\n' 
-							+ columns[ownerId] + '\t\n<b>' + getInnerText(rows[i],ownerId) + '</b>\t\n\n' 
-							 
-							
-							);		
-	
-						*/
-/*							
-						}
-					}
-					
-					browser.storage.local.set({ 'tickets': tickets }).then(setItem, onError);
-					
-					if (hours >= 8 && hours < 21) {
-						
-						if (minute === 05) {
-						
-						//let ticketsCount = document.getElementById('Dashboard0130-TicketOpenAll').innerText.split('(')[1].split(')')[0]; 
-	
-						//sendMessage(
-						//	'<tg-emoji emoji-id="5368324170671202286">📯</tg-emoji>' + ` Зараз є ${+ticketsCount} ${getKindTicket(ticketsCount)} `
-						//	);
-						sendMessage(getAnswerOnline());
-						/* sendMessage(
-							'<tg-emoji emoji-id="5368324170671202286">😎</tg-emoji>' + ' Просто нагадую, що я працюю'
-							);
-							*/
-/*					}
-					}
-					
-					
-							
-				} else {
-					if (hours >= 8 && hours < 21) {
-						if (minute === 05) {
-							sendMessage(
-								'<tg-emoji emoji-id="5368324170671202286">😎</tg-emoji>' + ' На даний момент необроблених заявок немає'
-								);
-						}
-					}
-					
-				} 
-			}
-	
-		}, onError);
-}
-	
-*/
-
-
-
-//**************************************
 async function checkNewTicket(columns) {
 	const now = new Date();
 	const minute = now.getMinutes();
@@ -618,9 +428,6 @@ async function checkNewTicket(columns) {
 			console.error('Error getting password from storage:', error);
 		}
 
-		//console.log('user', user.username);
-		//console.log('password', user.password);
-
 		const loginError = getLoginError();
 		console.log('loginError', loginError);
 
@@ -630,11 +437,7 @@ async function checkNewTicket(columns) {
 
 		if (hours >= 8 && hours < 21) {
 			if ([5, 20, 35, 50].includes(minute)) {
-				if (loginError) {
-					sendMessage('<blockquote>' + loginError + '</blockquote>\t\n' + getAnswer(answersLogin));
-				} else {
-					sendMessage(getAnswer(answersLogin));
-				}
+				sendMessage(getAnswer(answersLogin));
 
 			}
 		}
@@ -649,20 +452,6 @@ async function checkNewTicket(columns) {
 	}
 
 	const rows = document.getElementsByClassName("MasterAction");
-
-	/*
-	0: "Пріоритет"
-	1: "Нове повідомлення"
-	2: "TicketNumber"
-	3: "Створено"
-	4: "Відкрита"
-	5: "Заголовок"
-	6: "Стан"
-	7: "Власник"
-	8: "Ім'я клієнта"
-	9: "Тег заявки"
-	10: "Черга"
-	*/
 
 	const ticketNumId = columns.findIndex(el => el === 'TicketNumber');
 	const createdId = columns.findIndex(el => el === 'Створено');
@@ -688,35 +477,18 @@ async function checkNewTicket(columns) {
 			const ticketNumber = getInnerText(rows[i], ticketNumId);
 			const ticketState = getInnerText(rows[i], stateId);
 			if (!tickets.includes(ticketNumber) && ticketState === 'Призначена') {
-				//if (!tickets.includes(ticketNumber)) {
 				tickets.push(ticketNumber);
 				const ticketURL = getTicketURL(rows[i], ticketNumId);
 				const ticketText = await getTicketText(ticketURL); // Асинхронний виклик
 
-				/*  sendMessage(
-					  `<tg-emoji emoji-id="5368324170671202286">🚨</tg-emoji>${columns[ticketNumId]}<tg-emoji emoji-id="5368324170671202286">🚨</tg-emoji>
-					  \t\n<b>${getInnerText(rows[i], ticketNumId)}</b>\t\n\n${columns[createdId]}
-					  \t\n<b>${getInnerText(rows[i], createdId)} (${getInnerText(rows[i], ageId)})</b>\t\n\n${columns[ticketTagId]}
-					  \t\n<b>${getInnerText(rows[i], ticketTagId)}</b>\t\n\n${columns[titleId]}
-					  \t\n<b>${getInnerText(rows[i], titleId)}</b>\t\n\n${columns[customerNameId]} <tg-emoji emoji-id="5368324170671202286">😭</tg-emoji>
-					  \t\n<b>${getInnerText(rows[i], customerNameId)}</b>\t\n\n${columns[stateId]}
-					  \t\n<b>${getInnerText(rows[i], stateId)}</b>\t\n\n${columns[ownerId]}
-					  \t\n<b>${getInnerText(rows[i], ownerId)}</b>\t\n\n${ticketText}`
-				  );
-				  */
-
 				sendMessage(
-					'🚨' + columns[ticketNumId] + '🚨' + '\t\n'
-					+ `<a href="${ticketURL}">` + getInnerText(rows[i], ticketNumId) + '</a>\t\n\n'
-					+ columns[createdId] + '\t\n<b>' + getInnerText(rows[i], createdId) + ' (' + getInnerText(rows[i], ageId) + ')</b>\t\n\n'
-					+ columns[ticketTagId] + '\t\n<b>' + getInnerText(rows[i], ticketTagId) + '</b>\t\n\n'
-					+ columns[titleId] + '\t\n<b>' + getInnerText(rows[i], titleId) + '</b>\t\n\n'
-					+ columns[customerNameId] + ' 😭' + '\t\n<b>' + getInnerText(rows[i], customerNameId) + '</b>\t\n\n'
+					'🚨' + columns[ticketNumId] + '🚨' + '	'
+					+ `<a href="${ticketURL}">` + getInnerText(rows[i], ticketNumId) + '</a>	'
+					+ columns[createdId] + '	<b>' + getInnerText(rows[i], createdId) + ' (' + getInnerText(rows[i], ageId) + ')</b>	'
+					+ columns[ticketTagId] + '	<b>' + getInnerText(rows[i], ticketTagId) + '</b>	'
+					+ columns[titleId] + '	<b>' + getInnerText(rows[i], titleId) + '</b>	'
+					+ columns[customerNameId] + ' 😭' + '	<b>' + getInnerText(rows[i], customerNameId) + '</b>	'
 					+ ticketText
-					//+ columns[stateId] + '\t\n<b>' + getInnerText(rows[i],stateId) + '</b>\t\n\n' 
-					//+ columns[ownerId] + '\t\n<b>' + getInnerText(rows[i],ownerId) + '</b>\t\n\n' 
-
-
 				);
 			}
 		}
@@ -727,20 +499,11 @@ async function checkNewTicket(columns) {
 			console.error('Error setting tickets to storage:', error);
 		}
 
-		if (hours >= 8 && hours < 21 && minute === 5) {
-			sendMessage(getAnswer(answersOnline));
-		}
+		sendMessage(getAnswer(answersOnline));
 	} else {
-		if (hours >= 8 && hours < 21 && minute === 5) {
-			sendMessage('<tg-emoji emoji-id="5368324170671202286">😎</tg-emoji> На даний момент необроблених заявок немає');
-		}
+		sendMessage('<tg-emoji emoji-id="5368324170671202286">😎</tg-emoji> На даний момент необроблених заявок немає');
 	}
 }
-
-
-//************************************************************************************
-
-
 
 
 async function getChatBot() {
@@ -777,11 +540,8 @@ async function addWorkTime(rows, customerId) {
 		const customerTitle = getTitleText(rows[i], customerId);
 
 		if (customerName !== customerTitle) {
-			// console.log('return');
 			return;
 		}
-		// console.log(customerName + ' = ' + customerTitle);
-
 
 		const customerIndex = customerName.split(' ')[0].trim();
 		if (customerIndex.length == 5 && !isNaN(customerIndex)) {
@@ -911,7 +671,6 @@ function isOpen(openHours) {
 			const tTo = open.TTO.split(':');
 			if ((hours > +tFrom[0] || (hours === +tFrom[0] && minute >= +tFrom[1])) &&
 				(hours < +tTo[0] || (hours === +tTo[0] && minute < +tTo[1]))) {
-				// console.log('pause', open);
 				state = 'pause';
 			}
 		}
@@ -920,7 +679,6 @@ function isOpen(openHours) {
 			const tTo = open.TTO.split(':');
 			if ((hours > +tFrom[0] || (hours === +tFrom[0] && minute >= +tFrom[1])) &&
 				(hours < +tTo[0] || (hours === +tTo[0] && minute < +tTo[1]))) {
-				// console.log('open', open);
 				state = state !== 'pause' ? 'open' : 'pause';
 			}
 		}
@@ -973,7 +731,7 @@ function sendWaitingMessage(text, row, idList) {
 			+ `${columns[idList.titleId]} \n<b> ${getInnerText(row, idList.titleId)} </b>\n\n`
 			+ `${columns[idList.createdId]} \n<b> ${getInnerText(row, idList.createdId)}  (${getInnerText(row, idList.ageId)}) </b>`
 
-		sendMessage(BOT_TOKEN, chatBot.chatId, messageText);
+		sendMessage(messageText);
 	}
 }
 
@@ -1024,7 +782,7 @@ function sendBlockMessage(text, row, idList) {
 			+ `${columns[idList.titleId]} \n<b> ${getInnerText(row, idList.titleId)} </b>\n\n`
 			+ `${columns[idList.createdId]} \n<b> ${getInnerText(row, idList.createdId)}  (${getInnerText(row, idList.ageId)}) </b>`
 
-		sendMessage(BOT_TOKEN, chatBot.chatId, messageText);
+		sendMessage(messageText);
 	}
 }
 
@@ -1044,11 +802,10 @@ async function blockTicket(url) {
 			throw new Error('Block URL not found');
 			return false;
 		}
-		//*********************Comment if TEST */
 		const response2 = await fetch(blockURL);
 		if (!response2.ok) {
 			if (chatBot.isActive) {
-				sendMessage(BOT_TOKEN, chatBot.chatId, 'Я, чесно, намагався заблокувати заявку, але... ');
+				sendMessage('Я, чесно, намагався заблокувати заявку, але... ');
 			}
 			throw new Error('Network response was not ok for the second fetch');
 
@@ -1064,7 +821,6 @@ async function blockTicket(url) {
 }
 
 function getBlockUrl(textTicket) {
-	//const htmlTicket = stringToHTML(textTicket);
 
 	const parser = new DOMParser();
 	const htmlTicket = parser.parseFromString(textTicket, 'text/html');
@@ -1098,13 +854,10 @@ async function getTicketText(url) {
 		const article = getArticleID(htmlID);
 		const articleURL = article.url;
 
-		//console.log('article', article);
-
 		if (!articleURL) {
 			throw new Error('Article URL not found');
 		}
 
-		//console.log(`${url}#${articleURL}`);
 		const response2 = await fetch(`http://help.ukrposhta.loc${articleURL}`);
 		if (!response2.ok) {
 			throw new Error('Network response was not ok for the second fetch');
@@ -1125,7 +878,6 @@ function getArticleID(text) {
 		return null;
 	}
 
-	//console.log('no', content, content[content.length-1].children[1].value);
 	const articleID = {
 		id: content[content.length - 1].children[1].value,
 		url: content[content.length - 1].children[0].value
@@ -1138,15 +890,11 @@ async function getArticleText(text, articleId) {
 	const articleBody = articleBodyHtml.getElementsByClassName('ArticleBody');
 	const messageBrowser = articleBodyHtml.getElementsByClassName('MessageBrowser');
 
-	//console.log('articleBody', articleBodyHtml);
-
 	if (articleBody.length > 0) {
-		// console.log('ArticleBody', articleBody);
 		const textMessage = articleBody[0].innerText.split('********************************************************************************')[0]
 			.split('***');
 		const mess = textMessage[0].trim()
 			+ '\n***\n' + textMessage[1].split('\n')[1].trim();
-		//console.log('mess', mess);
 		return mess;
 	} else if (messageBrowser.length > 0) {
 		const ifr = articleBodyHtml.getElementsByClassName('ArticleMailContentHTMLWrapper');
@@ -1163,7 +911,6 @@ async function getArticleText(text, articleId) {
 				const iframeText = await responseID.text();
 				const iframeHtml = stringToHTML(iframeText);
 				const textMessage = iframeHtml.innerText.trim();
-				//console.log('textMessage',textMessage);
 				const mess = textMessage;
 				return mess;
 			} catch (error) {
@@ -1190,7 +937,6 @@ function addTagToText() {
 
 	if (article.length > 0) {
 		const articleText = article[0].innerHTML;
-		//console.log('articleText',articleText);
 		const tmp1 = articleText.substring(0, articleText.indexOf('IP адреса'));
 		let tmp2 = articleText.substring(articleText.indexOf('IP адреса'), articleText.indexOf('Робоча група:'));
 		const tmp3 = articleText.substring(articleText.indexOf('Робоча група:'));
@@ -1238,8 +984,6 @@ function copySelection(elementId) {
 	}
 }
 
-//**************************************
-
 async function setData(key, value) {
 	try {
 		await browser.storage.local.set({ [key]: value });
@@ -1251,12 +995,10 @@ async function setData(key, value) {
 
 async function getData(key) {
 	const gettingItem = await browser.storage.local.get(key);
-	//console.log('gettingItem', gettingItem[key]);
 	return gettingItem[key];
 }
 
 
-//*************Login***********************
 function login() {
 
 	const graf = document.getElementsByClassName('D3GraphCanvas');
@@ -1276,8 +1018,6 @@ function login() {
 
 }
 
-//*************End Login*******************
-
 function stringToHTML(text) {
 	let parser = new DOMParser();
 	let doc = parser.parseFromString(text, 'text/html');
@@ -1285,7 +1025,6 @@ function stringToHTML(text) {
 }
 
 function checkDialog() {
-	//const dialog = document.getElementsByClassName('Dialog'); 
 	const dialog = document.getElementById('DialogButton1');
 	if (dialog) {
 		return dialog.textContent === "Reload page";
@@ -1296,24 +1035,16 @@ function checkDialog() {
 function checkNetError() {
 	const errButt = document.getElementById('netErrorButtonContainer');
 	const errOTRS = document.getElementsByClassName('ErrorMessage');
-	//const errAjax = document.getElementById('AjaxErrorDialog');
 
 	if (errButt || errOTRS.length > 0) {
-		//console.log(errButt, errOTRS.length);
 		return true
 	} else {
 		return false;
 	}
-	/*
-	if (errButt) {
-		window.location.reload();
-	}*/
 }
 
 function checkLogin() {
 	const loginBox = document.getElementById('LoginBox');
-	//console.log('loginBox',loginBox);
-	//console.log(document.getElementsByClassName('Error'));
 	if (loginBox) {
 
 		return true
@@ -1379,7 +1110,6 @@ function isDashboard() {
 	if (window.location.href != 'http://help.ukrposhta.loc/otrs/index.pl?Action=AgentDashboard' &&
 		window.location.href != 'http://help.ukrposhta.loc/otrs/index.pl?' &&
 		window.location.href != 'http://help.ukrposhta.loc/otrs/index.pl?Action=AgentTicketLockedView') {
-		// console.log('Not Dashboard', window.location.href);
 		return false;
 	}
 
@@ -1396,7 +1126,6 @@ function isTicketLocked() {
 function isTicketZoom() {
 	const index = window.location.href.indexOf('http://help.ukrposhta.loc/otrs/index.pl?Action=AgentTicketZoom;');
 	if (index < 0) {
-		//console.log('isTicketZoom', window.location.href, index);
 		return false;
 	}
 
@@ -1432,22 +1161,16 @@ function getTicketURL(row, id) {
 	return row.children[id].children[0].href
 }
 
-/*function setItem() {
-  console.log("OK");
-}*/
+async function sendMessage(message) {
+	const chatBot = await getData('chatBot');
+	if (!chatBot || !chatBot.isActive || !chatBot.botToken || !chatBot.chatId) {
+		console.log('Telegram bot is not configured or disabled.');
+		return;
+	}
 
-/*function onError(error) {
-  console.log(error);
-}*/
-
-/*function onGot(item) {
-	console.log('onGot', item);
-}*/
-
-function sendMessage(BOT_TOKEN, CHAT_ID, message) {
-	const url = `https://api.telegram.org/bot${BOT_TOKEN}/sendMessage`;
-	const data = {
-		chat_id: CHAT_ID,
+	const url = `https://api.telegram.org/bot${chatBot.botToken}/sendMessage`;
+		const data = {
+		chat_id: chatBot.chatId,
 		text: message,
 		parse_mode: 'html'
 	};
@@ -1462,38 +1185,73 @@ function sendMessage(BOT_TOKEN, CHAT_ID, message) {
 	})
 		.then(response => response.json())
 		.then(data => {
-			//console.log('Message sent successfully:', data);
 		})
 		.catch(error => {
 			console.error('Error sending message:', error);
 		});
 }
 
-/*function oldSendMessage(message) {
-	let url = `https://api.telegram.org/bot${BOT_TOKEN}/sendMessage`;
-	
-	const data = JSON.stringify({
-		chat_id: CHAT_ID,
-		text: message
-	});
-	
-	let formData = new FormData();
+async function updateBotToken() {
+    await setData('botTokenStatus', 'LOADING');
+    const apiKey = await getData('apiKey');
+    const user = await getData('user');
 
-	formData.append("chat_id", CHAT_ID);
-	formData.append("text", message);
-	
-	console.log('data',data);
-	try {
-		let oReq = new XMLHttpRequest();
-		oReq.open("POST", url, true);
-	
-		oReq.setRequestHeader('Content-Type', 'application/json');
-		oReq.setRequestHeader('Origin', 'http://ukrposhta.loc');
-		
-		oReq.send(formData);
-		console.log('Message sent successfully', url);
-	} catch (error) {
-		console.error('Error sending message:', error);
-	}
-    
-}*/
+    if (!apiKey || !user || !user.username || !user.password) {
+        await setData('botTokenStatus', 'Not configured');
+        return;
+    }
+
+    const AuthUrl = `https://identitytoolkit.googleapis.com/v1/accounts:signInWithPassword?key=${apiKey}`;
+    const DBUrl = 'https://otrs-patterns-default-rtdb.europe-west1.firebasedatabase.app/info/TelegramBot.json';
+
+    try {
+        const loginData = await runPost(AuthUrl, {
+            email: `${user.username}@ukrposhta.ua`,
+            password: user.password,
+            returnSecureToken: true
+        });
+
+        if (loginData.error) {
+            throw new Error(loginData.error.message);
+        }
+
+        const url = DBUrl + `?auth=${loginData.idToken}`;
+        const response = await fetch(url);
+        if (!response.ok) {
+            throw new Error('Failed to fetch bot token');
+        }
+
+        const json = await response.json();
+        if (json && json.BOT_TOKEN) {
+            let chatBot = await getData('chatBot') || {};
+            chatBot.botToken = json.BOT_TOKEN;
+            await setData('chatBot', chatBot);
+            await setData('botTokenStatus', 'LOADED');
+        } else {
+            throw new Error('BOT_TOKEN not found in response');
+        }
+    } catch (error) {
+        console.error('Error updating bot token:', error);
+        await setData('botTokenStatus', `ERROR: ${error.message}`);
+    }
+}
+
+async function runPost(url, data) {
+    try {
+        const responseID = await fetch(url, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            mode: 'cors',
+            body: JSON.stringify(data)
+        });
+        if (!responseID.ok) {
+            throw new Error(`HTTP error! status: ${responseID.status}`);
+        }
+        return await responseID.json();
+    } catch (error) {
+        console.error('There has been a problem with your fetch operation:', error);
+        throw error;
+    }
+}

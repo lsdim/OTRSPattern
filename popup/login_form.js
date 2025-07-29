@@ -32,49 +32,102 @@ let user = {};
     
 
 
-loginForm.addEventListener("submit", (e) => {
+loginForm.addEventListener("submit", async (e) => {
   e.preventDefault();
   
-  
-
   if (username.value == "" || password.value == "") {
-    alert("Заповніть обидва поля!");
-  } else {
-	  
-    user.username = username.value;
-	  user.password = password.value;
-	  user.isActive = loginActive.checked;
-	  setData(user);
-	  setDataKey(apiKey.value);
-	  alert("Збережено!");
-
+    alert("Заповніть поля імені користувача та пароля!");
+    return;
   }
-  
-  console.log('submit');
 
+  user.username = username.value;
+  user.password = password.value;
+  user.isActive = loginActive.checked;
+  await setData('user', user);
+  await setData('apiKey', apiKey.value);
+
+  if (apiKey.value) {
+      await updateBotToken();
+  }
+
+  alert("Збережено!");
 });
 
-async function setData(user) {
-	try {
-            await browser.storage.local.set({ 'user': user });
-        } catch (error) {
-            console.error('Error setting tickets to storage:', error);
+async function updateBotToken() {
+    await setData('botTokenStatus', 'LOADING');
+    const user = await getData('user');
+    const apiKey = await getData('apiKey');
+
+    if (!apiKey || !user || !user.username || !user.password) {
+        await setData('botTokenStatus', 'Not configured');
+        return;
+    }
+
+    const AuthUrl = `https://identitytoolkit.googleapis.com/v1/accounts:signInWithPassword?key=${apiKey}`;
+    const DBUrl = 'https://otrs-patterns-default-rtdb.europe-west1.firebasedatabase.app/info/TelegramBot.json';
+
+    try {
+        const loginData = await runPost(AuthUrl, {
+            email: `${user.username}@ukrposhta.ua`,
+            password: user.password,
+            returnSecureToken: true
+        });
+
+        if (loginData.error) {
+            throw new Error(loginData.error.message);
         }
-		console.log('set');
+
+        const url = DBUrl + `?auth=${loginData.idToken}`;
+        const response = await fetch(url);
+        if (!response.ok) {
+            throw new Error('Failed to fetch bot token');
+        }
+
+        const json = await response.json();
+        if (json && json.BOT_TOKEN) {
+            let chatBot = await getData('chatBot') || {};
+            chatBot.botToken = json.BOT_TOKEN;
+            await setData('chatBot', chatBot);
+            await setData('botTokenStatus', 'LOADED');
+        } else {
+            throw new Error('BOT_TOKEN not found in response');
+        }
+    } catch (error) {
+        console.error('Error updating bot token:', error);
+        await setData('botTokenStatus', `ERROR: ${error.message}`);
+    }
 }
 
-async function setDataKey(apiKey) {
-	try {
-            await browser.storage.local.set({ 'apiKey': apiKey });
-        } catch (error) {
-            console.error('Error setting tickets to storage:', error);
+async function runPost(url, data) {
+    try {
+        const responseID = await fetch(url, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            mode: 'cors',
+            body: JSON.stringify(data)
+        });
+        if (!responseID.ok) {
+            throw new Error(`HTTP error! status: ${responseID.status}`);
         }
-		console.log('set');
+        return await responseID.json();
+    } catch (error) {
+        console.error('There has been a problem with your fetch operation:', error);
+        throw error;
+    }
+}
+
+async function setData(key, value) {
+	try {
+            await browser.storage.local.set({ [key]: value });
+        } catch (error) {
+            console.error(`Error setting ${key} to storage:`, error);
+        }
 }
 
 async function getData(key) {
 	const gettingItem = await browser.storage.local.get(key);
-    //console.log('gettingItem', gettingItem[key]);
     return gettingItem[key];
 
 }
