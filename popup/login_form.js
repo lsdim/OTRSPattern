@@ -47,13 +47,13 @@ loginForm.addEventListener("submit", async (e) => {
   await setData('apiKey', apiKey.value);
 
   if (apiKey.value) {
-      await updateBotToken();
+      await syncFirebaseSettings();
   }
 
   alert("Збережено!");
 });
 
-async function updateBotToken() {
+async function syncFirebaseSettings() {
     await setData('botTokenStatus', 'LOADING');
     const user = await getData('user');
     const apiKey = await getData('apiKey');
@@ -64,7 +64,8 @@ async function updateBotToken() {
     }
 
     const AuthUrl = `https://identitytoolkit.googleapis.com/v1/accounts:signInWithPassword?key=${apiKey}`;
-    const DBUrl = 'https://otrs-patterns-default-rtdb.europe-west1.firebasedatabase.app/info/TelegramBot.json';
+    const BotTokenUrl = 'https://otrs-patterns-default-rtdb.europe-west1.firebasedatabase.app/info/TelegramBot.json';
+    const UserSettingsUrl = `https://otrs-patterns-default-rtdb.europe-west1.firebasedatabase.app/user_settings/${user.username}.json`;
 
     try {
         const loginData = await runPost(AuthUrl, {
@@ -76,24 +77,38 @@ async function updateBotToken() {
         if (loginData.error) {
             throw new Error(loginData.error.message);
         }
+        const authToken = loginData.idToken;
 
-        const url = DBUrl + `?auth=${loginData.idToken}`;
-        const response = await fetch(url);
-        if (!response.ok) {
-            throw new Error('Failed to fetch bot token');
+        const [botTokenResponse, userSettingsResponse] = await Promise.all([
+            fetch(BotTokenUrl + `?auth=${authToken}`),
+            fetch(UserSettingsUrl + `?auth=${authToken}`)
+        ]);
+
+        if (!botTokenResponse.ok) {
+             throw new Error(`Failed to fetch global bot token: ${botTokenResponse.statusText}`);
         }
 
-        const json = await response.json();
-        if (json && json.BOT_TOKEN) {
-            let chatBot = await getData('chatBot') || {};
-            chatBot.botToken = json.BOT_TOKEN;
-            await setData('chatBot', chatBot);
+        const botTokenData = await botTokenResponse.json();
+        const userSettingsData = userSettingsResponse.ok ? await userSettingsResponse.json() : null;
+
+        let chatBot = await getData('chatBot') || {};
+
+        if (botTokenData && botTokenData.BOT_TOKEN) {
+            chatBot.botToken = botTokenData.BOT_TOKEN;
             await setData('botTokenStatus', 'LOADED');
         } else {
-            throw new Error('BOT_TOKEN not found in response');
+            await setData('botTokenStatus', 'ERROR: Global BOT_TOKEN not found');
         }
+
+        if (userSettingsData) {
+            chatBot.chatId = userSettingsData.chatId;
+            chatBot.botId = userSettingsData.botId;
+        }
+
+        await setData('chatBot', chatBot);
+
     } catch (error) {
-        console.error('Error updating bot token:', error);
+        console.error('Error syncing Firebase settings:', error);
         await setData('botTokenStatus', `ERROR: ${error.message}`);
     }
 }
@@ -109,7 +124,9 @@ async function runPost(url, data) {
             body: JSON.stringify(data)
         });
         if (!responseID.ok) {
-            throw new Error(`HTTP error! status: ${responseID.status}`);
+            const errorBody = await responseID.json();
+            const errorMessage = errorBody.error.message || `HTTP error! status: ${responseID.status}`;
+            throw new Error(errorMessage);
         }
         return await responseID.json();
     } catch (error) {
