@@ -1,4 +1,3 @@
-﻿
 document.querySelectorAll('.menu a').forEach(link => {
 	if (link.href === window.location.href) {
 		link.classList.add('active');
@@ -7,9 +6,9 @@ document.querySelectorAll('.menu a').forEach(link => {
 
 
 
-const apiKey = 'AIzaSyDDQPP3Csks1c6p-gwZPXKHoLec1yQmkAo';
+
 const DBUrl = 'https://otrs-patterns-default-rtdb.europe-west1.firebasedatabase.app/patterns.json';
-const AuthUrl = `https://identitytoolkit.googleapis.com/v1/accounts:signInWithPassword?key=${apiKey}`;
+let AuthUrl = '';
 
 const loginForm = document.getElementById('loginForm');
 
@@ -60,6 +59,9 @@ const isAddProblem = document.getElementById("isAddProblem");
 setValues();
 
 async function setValues() {
+
+	const apiKey = await getData('apiKey');
+	AuthUrl = `https://identitytoolkit.googleapis.com/v1/accounts:signInWithPassword?key=${apiKey}`;
 
 	const patterns = await getPatternsFromDB(DBUrl);
 
@@ -325,6 +327,7 @@ async function getToken() {
 	}
 
 	return token;
+
 }
 
 async function login() {
