@@ -9,10 +9,16 @@
     "48": "icons/otrs-48.png"
   },
 
+"browser_specific_settings": {
+  "gecko": {
+    "id": "OTRSPattern@ukrposhta.ua"
+  }
+},
+
   "content_scripts": [
     {
       "matches": ["*://*.help.ukrposhta.loc/otrs/index.pl*"],
-      "js": ["OTRSPattern.js", "answers.js"]
+      "js": ["OTRSPattern.js"]
     }
   ],
   
@@ -22,7 +28,7 @@
     "*://api.telegram.org/*",
     "*://*.ukrposhta.ua/*",
     "*://identitytoolkit.googleapis.com/*",
-    "*://otrs-patterns-default-rtdb.europe-west1.firebasedatabase.app*",
+    "*://otrs-patterns-default-rtdb.europe-west1.firebasedatabase.app/*",
 	"activeTab"
   ],
   
