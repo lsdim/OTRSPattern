@@ -1,0 +1,12 @@
+{
+  "addons": {
+    "OTRSPattern@ukrposhta.ua": {
+      "updates": [
+        {
+          "version": "1.0",
+          "update_link": "https://github.com/lsdim/OTRSPattern/releases/download/v1.0/OTRSPattern.zip"
+        }
+      ]
+    }
+  }
+}

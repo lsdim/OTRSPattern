@@ -11,7 +11,8 @@
 
 "browser_specific_settings": {
   "gecko": {
-    "id": "OTRSPattern@ukrposhta.ua"
+    "id": "OTRSPattern@ukrposhta.ua",
+    "update_url": "https://raw.githubusercontent.com/lsdim/OTRSPattern/main/updates.json"
   }
 },
 
