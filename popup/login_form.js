@@ -55,33 +55,19 @@ loginForm.addEventListener("submit", async (e) => {
 
 async function syncFirebaseSettings() {
     await setData('botTokenStatus', 'LOADING');
-    const user = await getData('user');
-    const apiKey = await getData('apiKey');
-
-    if (!apiKey || !user || !user.username || !user.password) {
-        await setData('botTokenStatus', 'Not configured');
-        return;
-    }
-
-    const AuthUrl = `https://identitytoolkit.googleapis.com/v1/accounts:signInWithPassword?key=${apiKey}`;
-    const BotTokenUrl = 'https://otrs-patterns-default-rtdb.europe-west1.firebasedatabase.app/info/TelegramBot.json';
-    const UserSettingsUrl = `https://otrs-patterns-default-rtdb.europe-west1.firebasedatabase.app/user_settings/${user.username}.json`;
-
+    
     try {
-        const loginData = await runPost(AuthUrl, {
-            email: `${user.username}@ukrposhta.ua`,
-            password: user.password,
-            returnSecureToken: true
-        });
-
-        if (loginData.error) {
-            throw new Error(loginData.error.message);
+        const authToken = await getToken();
+        if (!authToken.idToken) {
+            throw new Error("Authentication failed");
         }
-        const authToken = loginData.idToken;
+
+        const BotTokenUrl = 'https://otrs-patterns-default-rtdb.europe-west1.firebasedatabase.app/info/TelegramBot.json';
+        const UserSettingsUrl = `https://otrs-patterns-default-rtdb.europe-west1.firebasedatabase.app/user_settings/${user.username}.json`;
 
         const [botTokenResponse, userSettingsResponse] = await Promise.all([
-            fetch(BotTokenUrl + `?auth=${authToken}`),
-            fetch(UserSettingsUrl + `?auth=${authToken}`)
+            fetch(BotTokenUrl + `?auth=${authToken.idToken}`),
+            fetch(UserSettingsUrl + `?auth=${authToken.idToken}`)
         ]);
 
         if (!botTokenResponse.ok) {
@@ -111,40 +97,4 @@ async function syncFirebaseSettings() {
         console.error('Error syncing Firebase settings:', error);
         await setData('botTokenStatus', `ERROR: ${error.message}`);
     }
-}
-
-async function runPost(url, data) {
-    try {
-        const responseID = await fetch(url, {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json'
-            },
-            mode: 'cors',
-            body: JSON.stringify(data)
-        });
-        if (!responseID.ok) {
-            const errorBody = await responseID.json();
-            const errorMessage = errorBody.error.message || `HTTP error! status: ${responseID.status}`;
-            throw new Error(errorMessage);
-        }
-        return await responseID.json();
-    } catch (error) {
-        console.error('There has been a problem with your fetch operation:', error);
-        throw error;
-    }
-}
-
-async function setData(key, value) {
-	try {
-            await browser.storage.local.set({ [key]: value });
-        } catch (error) {
-            console.error(`Error setting ${key} to storage:`, error);
-        }
-}
-
-async function getData(key) {
-	const gettingItem = await browser.storage.local.get(key);
-    return gettingItem[key];
-
 }
