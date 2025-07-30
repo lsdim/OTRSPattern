@@ -36,8 +36,8 @@
   "page_action": {
 	"show_matches": ["*://*.help.ukrposhta.loc/otrs/index.pl*"],
 	"default_icon": {
-		"19": "icons/otrs-19.png",
-		"38": "icons/otrs-38.png"
+		"16": "icons/otrs-16.png",
+		"48": "icons/otrs-48.png"
 	},
 	"default_title": "OTRS Pattern",
 	"default_popup": "popup/Pattern_form.html"
