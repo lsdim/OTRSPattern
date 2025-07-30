@@ -1,7 +1,7 @@
 {
   "manifest_version": 2,
   "name": "OTRSPattern",
-  "version": "1.0",
+  "version": "1.1",
 
   "description": "Put pattern to ticket OTRS",
 
