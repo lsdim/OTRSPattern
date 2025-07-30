@@ -106,7 +106,7 @@ function addRow(data, column){
 		const cell3 = row.insertCell(2);
 
 		cell1.innerHTML = column;
-		cell2.innerHTML = data;
+		cell2.textContent = data;
 		cell3.innerHTML = '<button type="button" name="remove">Видалити</button>'; 
 		
 		cell1.style.width = "40%";

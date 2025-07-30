@@ -62,7 +62,7 @@ function getPatternsTextByName(patterns, id, tag) {
 
 function getPatternsByTag(patterns, tag) {
 
-	patternName.innerHTML = null;
+	patternName.innerHTML = '';
 
 	let newPatterns;
 

@@ -9,6 +9,14 @@
   }
   window.hasRun = true;
 
+  function escapeHTML(str) {
+    // This prevents XSS by escaping potentially dangerous characters.
+    if (typeof str !== 'string') {
+        return '';
+    }
+    return str.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;').replace(/'/g, '&#039;');
+  }
+
   function putTextInElement(text, ticketMessage) {
 	  const responseField = document.getElementsByClassName('cke_wysiwyg_frame'); //('cke_editable'); 
 	  //const responseField  = document.getElementById('RichText');
@@ -19,7 +27,7 @@
 		  return;
 	  }	  
 	  
-	  let newText = text.replace(/\r?\n/g, "<br />");	  
+	  let newText = escapeHTML(text).replace(/\r?\n/g, "<br />");	  
 	  
 	  const textField = responseField[0].contentDocument.children[0].innerHTML;	  
 	  

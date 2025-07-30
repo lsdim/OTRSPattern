@@ -68,7 +68,7 @@ function addRow(ticketNum){
 		const cell1 = row.insertCell(0);
 		const cell2 = row.insertCell(1);
 
-		cell1.innerHTML = ticketNum;
+		cell1.textContent = ticketNum;
 		cell2.innerHTML = '<button type="button" name="remove">Видалити</button>'; 
 	
 }

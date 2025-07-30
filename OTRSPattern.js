@@ -317,7 +317,7 @@ async function showDetails() {
 			for (let j = 1; j < 4; j++) {
 				const link = h[0] + ';Subaction=HTMLView;' + h[1] + ';Field=Field' + j;
 				const text = await getFAQText(link);
-				tab.rows[i].cells[getCellId('ЗАГОЛОВОК') + j].innerHTML = text;
+				tab.rows[i].cells[getCellId('ЗАГОЛОВОК') + j].textContent = text;
 			}
 
 			tab.rows[i].cells[getCellId('ДІЙСНІСТЬ')].remove();
@@ -350,7 +350,7 @@ async function getFAQText(url) {
 			console.error('FAQ not found in content');
 			return null;
 		} else {
-			return html.innerHTML;
+			return html.textContent;
 		}
 
 	} catch (error) {
@@ -374,7 +374,12 @@ async function setIndexTitleOpenHours() {
 				+ `Action=AgentTicketSearch&Subaction=Search&EmptySearch=1&ShownAttributes=LabelTicketNumber%3BLabelFrom&`
 				+ `Profile=&Name=&TicketNumber=&From=${customerIndex}&Attribute=Fulltext&ResultForm=Normal`;
 
-			indexElement.innerHTML = `<a href="${url}">` + state.icon + indexElement.innerHTML + '</a>';
+			const link = document.createElement('a');
+			link.href = url;
+			link.innerHTML = state.icon; // state.icon is safe, it comes from our own code
+			link.appendChild(document.createTextNode(indexElement.innerText));
+			indexElement.innerHTML = ''; // Clear the element
+			indexElement.appendChild(link);
 			indexElement.title = scheduleWork
 			indexElement.style.color = state.color;
 
@@ -927,32 +932,36 @@ async function getArticleText(text, articleId) {
 }
 
 function addTagToText() {
-
 	const ip = document.getElementById('ip');
 	if (ip) {
 		return;
 	}
-
 	const article = document.getElementsByClassName('ArticleBody');
-
 	if (article.length > 0) {
-		const articleText = article[0].innerHTML;
-		const tmp1 = articleText.substring(0, articleText.indexOf('IP адреса'));
-		let tmp2 = articleText.substring(articleText.indexOf('IP адреса'), articleText.indexOf('Робоча група:'));
-		const tmp3 = articleText.substring(articleText.indexOf('Робоча група:'));
-
-		const tmp4Arr = tmp2.split(':');
-
-
-		tmp4Arr[1] = '<span style="cursor:pointer; background:#ffc107" id="ip">' + tmp4Arr[1].trim() + '</span>';
-		tmp2 = tmp4Arr.join(': ');
-
-		console.log('tmp2', tmp2);
-
-		article[0].innerHTML = tmp1 + tmp2 + tmp3;
-
+		// Find the text node that contains the IP address
+		const treeWalker = document.createTreeWalker(article[0], NodeFilter.SHOW_TEXT, null, false);
+		let node;
+		while (node = treeWalker.nextNode()) {
+			const text = node.nodeValue;
+			const ipIndex = text.indexOf('IP адреса:');
+			if (ipIndex !== -1) {
+				const ipAddress = text.substring(ipIndex + 10).trim().split(/\s|\n/)[0];
+				if (ipAddress) {
+					const span = document.createElement('span');
+					span.id = 'ip';
+					span.style.cursor = 'pointer';
+					span.style.background = '#ffc107';
+					span.textContent = ipAddress;
+					const range = document.createRange();
+					range.setStart(node, text.indexOf(ipAddress));
+					range.setEnd(node, text.indexOf(ipAddress) + ipAddress.length);
+					range.deleteContents();
+					range.insertNode(span);
+					break; // Exit after finding and replacing the IP
+				}
+			}
+		}
 	}
-
 }
 
 
