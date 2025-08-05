@@ -99,12 +99,7 @@ async function modTicket(columns) {
 		}
 
 		addTagToText();
-		const ip = document.getElementById('ip');
-		if (ip) {
-			ip.addEventListener("click", function () {
-				copySelection('ip');
-			});
-		}
+		
 
 	}
 
@@ -932,36 +927,64 @@ async function getArticleText(text, articleId) {
 }
 
 function addTagToText() {
-	const ip = document.getElementById('ip');
-	if (ip) {
-		return;
-	}
-	const article = document.getElementsByClassName('ArticleBody');
-	if (article.length > 0) {
-		// Find the text node that contains the IP address
-		const treeWalker = document.createTreeWalker(article[0], NodeFilter.SHOW_TEXT, null, false);
-		let node;
-		while (node = treeWalker.nextNode()) {
-			const text = node.nodeValue;
-			const ipIndex = text.indexOf('IP адреса:');
-			if (ipIndex !== -1) {
-				const ipAddress = text.substring(ipIndex + 10).trim().split(/\s|\n/)[0];
-				if (ipAddress) {
-					const span = document.createElement('span');
-					span.id = 'ip';
-					span.style.cursor = 'pointer';
-					span.style.background = '#ffc107';
-					span.textContent = ipAddress;
-					const range = document.createRange();
-					range.setStart(node, text.indexOf(ipAddress));
-					range.setEnd(node, text.indexOf(ipAddress) + ipAddress.length);
-					range.deleteContents();
-					range.insertNode(span);
-					break; // Exit after finding and replacing the IP
-				}
-			}
-		}
-	}
+    // Шукаємо за класом, а не за id
+    const existingHighlight = document.querySelector('.highlighted-ip');
+    if (existingHighlight) {
+        return; // Виділення вже виконано
+    }
+
+    const article = document.getElementsByClassName('ArticleBody');
+    if (article.length > 0) {
+        const ipRegex = /\b(?:[0-9]{1,3}\.){3}[0-9]{1,3}\b/g;
+        const treeWalker = document.createTreeWalker(article[0], NodeFilter.SHOW_TEXT, null, false);
+        let node;
+        let nodesToProcess = [];
+
+        // Збираємо всі текстові вузли
+        while (node = treeWalker.nextNode()) {
+            if (ipRegex.test(node.nodeValue)) {
+                nodesToProcess.push(node);
+            }
+        }
+
+        nodesToProcess.forEach(node => {
+            const text = node.nodeValue;
+            const matches = text.match(ipRegex);
+            if (!matches) return;
+
+            const parent = node.parentNode;
+            let lastIndex = 0;
+
+            matches.forEach((ipAddress, index) => {
+                const ipIndex = text.indexOf(ipAddress, lastIndex);
+
+                if (ipIndex > lastIndex) {
+                    parent.insertBefore(document.createTextNode(text.substring(lastIndex, ipIndex)), node);
+                }
+
+                const span = document.createElement('span');
+                // Додаємо спільний клас для всіх IP
+                span.className = 'highlighted-ip'; 
+                // Робимо ID унікальним, щоб уникнути конфліктів
+                span.id = 'ip' + Date.now() + index; 
+                span.style.cursor = 'pointer';
+                span.style.background = '#ffc107';
+                span.textContent = ipAddress;
+                span.addEventListener("click", function () {
+                    copySelection(span.id);
+                });
+                parent.insertBefore(span, node);
+
+                lastIndex = ipIndex + ipAddress.length;
+            });
+
+            if (lastIndex < text.length) {
+                parent.insertBefore(document.createTextNode(text.substring(lastIndex)), node);
+            }
+
+            parent.removeChild(node);
+        });
+    }
 }
 
 
