@@ -927,28 +927,31 @@ async function getArticleText(text, articleId) {
 }
 
 function addTagToText() {
-    // Шукаємо за класом, а не за id
+    // Перевіряємо, чи виділення вже було виконано, щоб уникнути дублювання
     const existingHighlight = document.querySelector('.highlighted-ip');
     if (existingHighlight) {
-        return; // Виділення вже виконано
+        return;
     }
 
     const article = document.getElementsByClassName('ArticleBody');
     if (article.length > 0) {
+        // Регулярний вираз для пошуку IP-адрес
         const ipRegex = /\b(?:[0-9]{1,3}\.){3}[0-9]{1,3}\b/g;
         const treeWalker = document.createTreeWalker(article[0], NodeFilter.SHOW_TEXT, null, false);
         let node;
         let nodesToProcess = [];
 
-        // Збираємо всі текстові вузли
+        // Збираємо лише ті текстові вузли, які містять фразу "IP адреса:"
         while (node = treeWalker.nextNode()) {
-            if (ipRegex.test(node.nodeValue)) {
+            if (node.nodeValue.includes('IP адреса:')) {
                 nodesToProcess.push(node);
             }
         }
 
+        // Обробляємо знайдені вузли
         nodesToProcess.forEach(node => {
             const text = node.nodeValue;
+            // Знаходимо всі IP-адреси в тексті вузла
             const matches = text.match(ipRegex);
             if (!matches) return;
 
@@ -958,15 +961,15 @@ function addTagToText() {
             matches.forEach((ipAddress, index) => {
                 const ipIndex = text.indexOf(ipAddress, lastIndex);
 
+                // Вставляємо текст, що був перед IP
                 if (ipIndex > lastIndex) {
                     parent.insertBefore(document.createTextNode(text.substring(lastIndex, ipIndex)), node);
                 }
 
+                // Створюємо та налаштовуємо span для IP-адреси
                 const span = document.createElement('span');
-                // Додаємо спільний клас для всіх IP
-                span.className = 'highlighted-ip'; 
-                // Робимо ID унікальним, щоб уникнути конфліктів
-                span.id = 'ip' + Date.now() + index; 
+                span.className = 'highlighted-ip'; // Спільний клас для ідентифікації
+                span.id = `ip-${Date.now()}-${index}`; // Унікальний ID
                 span.style.cursor = 'pointer';
                 span.style.background = '#ffc107';
                 span.textContent = ipAddress;
@@ -978,10 +981,12 @@ function addTagToText() {
                 lastIndex = ipIndex + ipAddress.length;
             });
 
+            // Вставляємо текст, що залишився після останнього IP
             if (lastIndex < text.length) {
                 parent.insertBefore(document.createTextNode(text.substring(lastIndex)), node);
             }
 
+            // Видаляємо оригінальний текстовий вузол, оскільки ми його замінили
             parent.removeChild(node);
         });
     }
